@@ -34,7 +34,7 @@ defmodule ModularProperty do
 
   property "every point inside segment (regardless of bound)" do
     forall {u = v, x} <- {bound(), point()} do
-      ensure Skip.Modular.in?(u, v, x) == true
+      ensure Skip.Modular.epsilon?(x, u, v) == true
     end
   end
 
@@ -47,7 +47,7 @@ defmodule ModularProperty do
         forall x <- point() do
           implies between?(x, [including: start.(u, v), excluding: stop.(u, v)]) do
 
-            ensure Skip.Modular.in?(u, v, x) == outcome
+            ensure Skip.Modular.epsilon?(x, u, v) == outcome
           end
         end
       end
