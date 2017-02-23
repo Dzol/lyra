@@ -6,16 +6,25 @@ defmodule Skip.Modular do
 
   @doc """
 
-  This is like `x ∈ [u, v)` with modular arithmetic.
+  This is like `x ∈ [u, v)` under modular arithmetic.
 
   """
-  def epsilon?(x, u, v) when u > v do
+
+  def epsilon?(x, u, v) do
+    natural!(x)
+    natural!(u)
+    natural!(v)
+
+    _epsilon?(x, u, v)
+  end
+
+  defp _epsilon?(x, u, v) when u > v do
     between?(x, segment(u, @norm)) or between?(x, segment(0, v))
   end
-  def epsilon?(_, u, v) when u == v do
+  defp _epsilon?(_, u, v) when u == v do
     true
   end
-  def epsilon?(x, u, v) when u < v do
+  defp _epsilon?(x, u, v) when u < v do
     between?(x, segment(u, v))
   end
 
@@ -27,5 +36,9 @@ defmodule Skip.Modular do
 
   defp segment(a, b) do
     [include: a, exclude: b]
+  end
+
+  defp natural!(x) do
+    true = is_integer(x) and x >= 0
   end
 end
