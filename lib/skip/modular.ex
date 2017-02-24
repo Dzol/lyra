@@ -9,8 +9,7 @@ defmodule Skip.Modular do
   This is like `x ∈ [u, v)` under modular arithmetic.
 
   """
-
-  def epsilon?(x, u, v) do
+  def epsilon?(x, include: u, exclude: v) do
     natural!(x)
     natural!(u)
     natural!(v)
