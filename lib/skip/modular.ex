@@ -1,8 +1,10 @@
 defmodule Skip.Modular do
-  @norm round(:math.pow(2, 160))
+  @moduledoc """
 
-  ## Value w/ more information instead of `true` or `false` something
-  ## like `:more` or `:less`.
+  Modular arithmetic on some intervals.
+
+  """
+  @norm round(:math.pow(2, 160))
 
   @doc """
 
@@ -14,27 +16,17 @@ defmodule Skip.Modular do
     natural!(u)
     natural!(v)
 
-    _epsilon?(x, u, v)
+    epsilon?(x, u, v)
   end
 
-  defp _epsilon?(x, u, v) when u > v do
-    between?(x, segment(u, @norm)) or between?(x, segment(0, v))
-  end
-  defp _epsilon?(_, u, v) when u == v do
-    true
-  end
-  defp _epsilon?(x, u, v) when u < v do
-    between?(x, segment(u, v))
+  defp epsilon?(x, u, v) do
+    distance(u, x) < distance(u, v)
   end
 
   ## Ancillary
 
-  defp between?(x, include: u, exclude: v) do
-    u <= x and x < v
-  end
-
-  defp segment(a, b) do
-    [include: a, exclude: b]
+  defp distance(a, b) do
+    Integer.mod((b - a), @norm)
   end
 
   defp natural!(x) do

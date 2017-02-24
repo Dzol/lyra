@@ -4,7 +4,7 @@ defmodule ModularProperty do
 
   @norm round(:math.pow(2, 160))
 
-  property "set membership under modular interval arithmetic correct" do
+  property "interval membership under modular arithmetic" do
     forall {u, v} <- bounds() do
       forall x <- point() do
         ensure Skip.Modular.epsilon?(x, include: u, exclude: v) == correct(x, u, v)
@@ -12,7 +12,7 @@ defmodule ModularProperty do
     end
   end
 
-  ## Our Model.
+  ## Our Model
 
   defp correct(x, u, v) when u < v do
     between?(x, include: u, exclude: v)
@@ -24,7 +24,7 @@ defmodule ModularProperty do
     between?(x, include: u, exclude: biggest()) or between?(x, include: 0, exclude: v)
   end
 
-  ## Test Ancillaries.
+  ## Test Ancillaries
 
   defp bounds do
     {bound(), bound()}
