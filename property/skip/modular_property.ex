@@ -5,9 +5,10 @@ defmodule ModularProperty do
   @norm round(:math.pow(2, 160))
 
   property "interval membership under modular arithmetic" do
+    import Skip.Modular, only: [epsilon?: 2]
     forall {u, v} <- bounds() do
       forall x <- point() do
-        ensure Skip.Modular.epsilon?(x, include: u, exclude: v) == correct(x, u, v)
+        ensure epsilon?(x, include: u, exclude: v) == correct(x, u, v)
       end
     end
   end
@@ -39,13 +40,10 @@ defmodule ModularProperty do
   end
 
   defp natural do
-    let i <- largeint() do
-      if i < biggest(), do: positive(i)
+    let i <- oneof([nat(), largeint()]) do
+      if abs(i) < biggest(), do: abs(i)
     end
   end
-
-  defp positive(x) when x < 0, do: -1 * x
-  defp positive(x) when x >= 0, do: x
 
   defp between?(x, [include: start, exclude: stop]) do
     start <= x and x < stop
