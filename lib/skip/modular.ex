@@ -13,23 +13,27 @@ defmodule Skip.Modular do
 
   This is like _x ∈ [u, v)_ under modular arithmetic
 
-  **Not** general: modular arithmetic of norm _2 <sup>160</sup>_ only.
-
   """
   def epsilon?(x, include: u, exclude: v) do
-    natural!(x)
-    natural!(u)
-    natural!(v)
+    _epsilon?(x, {u, v}, @norm)
+  end
+
+  def epsilon?(x, [include: u, exclude: v], n) do
+    _epsilon?(x, {u, v}, n)
+  end
+
+  defp _epsilon?(x, {u, v}, n) do
+    natural!(x); natural!(u); natural!(v)
 
     if not (u === v) do
-      epsilon?(x, u, v)
+      epsilon?(x, u, v, n)
     else
       true
     end
   end
 
-  defp epsilon?(x, u, v) do
-    distance(u, x) < distance(u, v)
+  defp epsilon?(x, u, v, n) do
+    distance(u, x, n) < distance(u, v, n)
   end
 
   ## Ancillary
@@ -38,8 +42,8 @@ defmodule Skip.Modular do
     true = is_integer(x) and x >= 0
   end
 
-  defp distance(a, b) do
-    Integer.mod(difference(a, b), @norm)
+  defp distance(a, b, n) do
+    Integer.mod(difference(a, b), n)
   end
 
   defp difference(a, b) do
