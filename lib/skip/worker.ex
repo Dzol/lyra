@@ -3,31 +3,98 @@ defmodule Skip.Worker do
 
   defstruct [:successor]
 
-  def resolve(worker, name) do
-    ## Digest in the client
-    GenServer.call(worker, {:resolve, digest(name)})
+  ## OTP Supervision Interface
+
+  def start_link do
+    GenServer.start_link(__MODULE__, [])
+  end
+
+  ## Client Interface
+
+  def resolve(worker, value) when is_pid(worker) and is_list(value) or is_binary(value) do
+    GenServer.call(worker, {:find_successor, digest(value)})
+  end
+
+  def find_successor(worker, node) when is_pid(worker) and is_pid(node) do # Find
+    GenServer.call(worker, {:find_successor, point(node)})
+  end
+  def find_successor(worker, value) when is_pid(worker) and is_list(value) or is_binary(value) do
+    GenServer.call(worker, {:find_successor, digest(value)})
+  end
+  def find_successor(worker, value) when is_pid(worker) and is_integer(value) do
+    GenServer.call(worker, {:find_successor, value})
+  end
+
+  def find_predecessor(worker, node) when is_pid(worker) and is_pid(node) do # Find
+    GenServer.call(worker, {:find_predecessor, point(node)})
+  end
+  def find_predecessor(worker, value) when is_pid(worker) and is_list(value) or is_binary(value) do
+    GenServer.call(worker, {:find_predecessor, digest(value)})
+  end
+  def find_predecessor(worker, value) when is_pid(worker) and is_integer(value) do
+    GenServer.call(worker, {:find_predecessor, value})
+  end
+
+  def enter(worker, ring) when is_pid(worker) and is_pid(ring) do
+    GenServer.call(worker, {:enter, ring})
   end
 
   ## Generic Server Machinery Interface
 
-  def init do
+  def init([]) do
     {:ok,
      %__MODULE__{successor: self()}
     }
   end
 
-  def handle_call({:resolve, x}, _, s) do
-    if successor?(x, point(self()), point(s.successor)) do
-      success(self(), s)
-    else
-      failure(s)
-    end
+  def handle_call({:find_successor, subject}, _, state) do
+    success(successor_query(successor(state), subject), state)
+  end
+  def handle_call({:find_predecessor, subject}, _, state) do
+    success(predecessor_query(successor(state), subject), state)
+  end
+  def handle_call({:enter, ring}, _, state) do
+    {p, s} = older_siblings(ring)
+    send(p, {:enter, self(), unique()})
+    success(:ok, successor(state, s))
+  end
+
+  def handle_info({:enter, vertex, _}, state) do
+    {:noreply, successor(state, vertex)}
   end
 
   ## Ancillary
 
-  defp successor?(x, u, v) do
-    Skip.Modular.epsilon?(x, include: u, exclude: v)
+  defp older_siblings(ring) do
+    {find_predecessor(ring, self()), find_successor(ring, self())}
+  end
+
+  defp successor_query(successor, subject) do
+    if between?(subject, self(), successor) do
+      successor
+    else
+      find_successor(successor, subject)
+    end
+  end
+
+  defp predecessor_query(successor, subject) do
+    if between?(subject, self(), successor) do
+      self()
+    else
+      find_predecessor(successor, subject)
+    end
+  end
+
+  defp between?(x, y, z) do
+    Skip.Modular.epsilon?(x, include: point(y), exclude: point(z))
+  end
+
+  defp successor(%__MODULE__{successor: x}) do
+    x
+  end
+
+  defp successor(x = %__MODULE__{}, y) do
+    %{x | successor: y}
   end
 
   defp point(x) when is_pid(x) do
@@ -48,7 +115,7 @@ defmodule Skip.Worker do
     {:reply, value, state}
   end
 
-  defp failure(state) do
-    {:reply, :failure, state}
+  defp unique do
+    make_ref()
   end
 end
