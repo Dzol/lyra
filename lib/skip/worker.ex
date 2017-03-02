@@ -48,15 +48,15 @@ defmodule Skip.Worker do
   end
 
   def handle_call({:find_successor, subject}, _, state) do
-    success(successor_query(successor(state), subject), state)
+    {:reply, successor_query(successor(state), subject), state}
   end
   def handle_call({:find_predecessor, subject}, _, state) do
-    success(predecessor_query(successor(state), subject), state)
+    {:reply, predecessor_query(successor(state), subject), state}
   end
   def handle_call({:enter, ring}, _, state) do
     {p, s} = older_siblings(ring)
     send(p, {:enter, self(), unique()})
-    success(:ok, successor(state, s))
+    {:reply, :ok, successor(state, s)}
   end
 
   def handle_info({:enter, vertex, _}, state) do
@@ -109,10 +109,6 @@ defmodule Skip.Worker do
 
   defp identifier(x) when is_pid(x) do
     :erlang.pid_to_list(x)
-  end
-
-  defp success(value, state) do
-    {:reply, value, state}
   end
 
   defp unique do
