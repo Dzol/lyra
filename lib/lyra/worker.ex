@@ -1,4 +1,4 @@
-defmodule Skip.Worker do
+defmodule Lyra.Worker do
   use GenServer
 
   defstruct [:successor]
@@ -86,7 +86,7 @@ defmodule Skip.Worker do
   end
 
   defp between?(x, y, z) do
-    Skip.Modular.epsilon?(x, include: point(y), exclude: point(z))
+    Lyra.Modular.epsilon?(x, include: point(y), exclude: point(z))
   end
 
   defp successor(%__MODULE__{successor: x}) do

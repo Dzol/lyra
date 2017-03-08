@@ -1,4 +1,4 @@
-defmodule Skip.Modular do
+defmodule Lyra.Modular do
   @moduledoc """
 
   Modular arithmetic on a _[u, v)_ interval

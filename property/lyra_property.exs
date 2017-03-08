@@ -1,9 +1,9 @@
-defmodule SkipProperty do
+defmodule LyraProperty do
   use ExUnit.Case
   use EQC.ExUnit
 
-  describe "Skip.Worker.*" do
-    alias Skip.Worker, as: Node
+  describe "Lyra.Worker.*" do
+    alias Lyra.Worker, as: Node
 
     property "resolution to same node against a ring of three" do
       ## Given:

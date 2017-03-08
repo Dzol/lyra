@@ -1,6 +1,6 @@
-defmodule Skip do
+defmodule Lyra do
   @moduledoc """
-  Documentation for Skip.
+  Documentation for Lyra.
   """
 
   @doc """
@@ -8,7 +8,7 @@ defmodule Skip do
 
   ## Examples
 
-      iex> Skip.hello
+      iex> Lyra.hello
       :world
 
   """

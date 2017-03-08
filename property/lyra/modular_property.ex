@@ -5,7 +5,7 @@ defmodule ModularProperty do
   @norm round(:math.pow(2, 160))
 
   property "interval membership under modular arithmetic" do
-    import Skip.Modular, only: [epsilon?: 2]
+    import Lyra.Modular, only: [epsilon?: 2]
     forall {u, v} <- bounds() do
       forall x <- point() do
         ensure epsilon?(x, include: u, exclude: v) == correct(x, u, v)

@@ -1,6 +1,6 @@
-[![Build Status](https://travis-ci.org/Dzol/skip.svg?branch=master)](https://travis-ci.org/Dzol/skip)
+[![Build Status](https://travis-ci.org/Dzol/lyra.svg?branch=master)](https://travis-ci.org/Dzol/lyra)
 
-# Skip
+# Lyra
 
 A [Chord][0] in Elixir.
 
