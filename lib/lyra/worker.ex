@@ -11,6 +11,10 @@ defmodule Lyra.Worker do
 
   ## Client Interface
 
+  def enter(worker, ring) when is_pid(worker) and is_pid(ring) do
+    GenServer.call(worker, {:enter, ring})
+  end
+
   def resolve(worker, value) when is_pid(worker) and is_list(value) or is_binary(value) do
     GenServer.call(worker, {:find_successor, digest(value)})
   end
@@ -33,10 +37,6 @@ defmodule Lyra.Worker do
   end
   def find_predecessor(worker, value) when is_pid(worker) and is_integer(value) do
     GenServer.call(worker, {:find_predecessor, value})
-  end
-
-  def enter(worker, ring) when is_pid(worker) and is_pid(ring) do
-    GenServer.call(worker, {:enter, ring})
   end
 
   ## Generic Server Machinery Interface
