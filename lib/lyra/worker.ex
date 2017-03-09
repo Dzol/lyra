@@ -15,6 +15,10 @@ defmodule Lyra.Worker do
     GenServer.call(worker, {:enter, ring})
   end
 
+  def exit(worker) when is_pid(worker) do
+    GenServer.call(worker, :exit)
+  end
+
   def resolve(worker, value) when is_pid(worker) and is_list(value) or is_binary(value) do
     GenServer.call(worker, {:find_successor, digest(value)})
   end
@@ -53,17 +57,39 @@ defmodule Lyra.Worker do
   def handle_call({:find_predecessor, subject}, _, state) do
     {:reply, predecessor_query(successor(state), subject), state}
   end
+  def handle_call({:predecessor, subject}, _, state) do
+    {:reply, successor(state), state}
+  end
   def handle_call({:enter, ring}, _, state) do
     {p, s} = older_siblings(ring)
     send(p, {:enter, self(), unique()})
     {:reply, :ok, successor(state, s)}
   end
+  def handle_call(:exit, _, state) do
+    p = predecessor(state)
+    send(p, {:exit, successor(state), unique()})
+    {:reply, :ok, successor(state, self())}
+  end
 
-  def handle_info({:enter, vertex, _}, state) do
+  def handle_info({x, vertex, _}, state) when x == :enter or x == :exit do
     {:noreply, successor(state, vertex)}
   end
 
   ## Ancillary
+
+  defp predecessor(%__MODULE__{successor: x}) do
+    predecessor_(x)
+  end
+
+  defp predecessor_(oracle) do
+    alias GenServer, as: Server
+
+    if Server.call(oracle, {:predecessor, point(self())}) == self() do
+      oracle
+    else
+      predecessor_(Server.call(oracle, {:predecessor, point(self())})) ##
+    end
+  end
 
   defp older_siblings(ring) do
     {find_predecessor(ring, self()), find_successor(ring, self())}
