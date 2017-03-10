@@ -30,6 +30,7 @@ defmodule LyraTest do
 
     u = Set.new(u); v = Set.new(v)
     for i = {_, y} <- Set.difference(u, v) do
+      assert Set.size(u) > Set.size(v)
       assert Enum.member?(u, i) and assumes?(v, y)
     end
   end
