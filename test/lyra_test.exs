@@ -3,7 +3,16 @@ defmodule LyraTest do
   alias MapSet, as: Set
   @size 64
 
-  test "Ring nodes responsible for more upon exits" do
+  test "Ring nodes responsible for LESS upon ENTRY" do
+    r = ring(3); v = draw(&uniform/0, @size * 16)
+
+    b = world(r, v)
+    a = world(more(r, @size - 3), v)
+
+    consistent!(a, b)
+  end
+
+  test "Ring nodes responsible for MORE upon EXIT" do
     r = ring(@size); v = draw(&uniform/0, @size * 16)
 
     b = world(r, v)
@@ -48,6 +57,20 @@ defmodule LyraTest do
           x
       end
     end
+  end
+
+  defp more(r, n) do
+    m = n
+    |> nodes()
+    |> Enum.shuffle()
+    ringify(r, m)
+  end
+
+  defp ringify(_, []) do
+    []
+  end
+  defp ringify(r, [n|more]) do
+    :ok = Lyra.Worker.enter(n, select(r)); [ n | ringify(r, more) ]
   end
 
   defp ring(n) when n >= 3 do
