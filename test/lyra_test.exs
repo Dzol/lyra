@@ -1,17 +1,17 @@
 defmodule LyraTest do
   use ExUnit.Case
+  alias MapSet, as: Set
   @size 64
 
-  test "Nodes assume responsibility upon ring exits" do
+  test "Ring nodes responsible for more upon exits" do
     r = ring(@size); v = draw(&uniform/0, @size * 16)
 
     b = world(r, v)
-    e = Enum.take(Enum.shuffle(r), div(@size, 4))
-    q = r -- e
-    for vertex <- e do
-      :ok = Lyra.Worker.exit(vertex)
+    e = Enum.take(Enum.shuffle(r), quater())
+    for edge <- e do
+      :ok = Lyra.Worker.exit(edge)
     end
-    a = world(q, v)
+    a = world(r -- e, v)
 
     consistent!(b, a)
   end
@@ -26,25 +26,26 @@ defmodule LyraTest do
   end
 
   defp consistent!(u, v) do
-    alias MapSet, as: Set
-
-    u = Set.new(u); v = Set.new(v)
     for i = {_, y} <- Set.difference(u, v) do
       assert Set.size(u) > Set.size(v)
-      assert Enum.member?(u, i) and assumes?(v, y)
+      assert Enum.member?(u, i)
+      assert Enum.count(buckets(v, y)) === 1
     end
   end
 
-  defp assumes?(o, v) do
-    Enum.count(Enum.reduce(o, [], who(v))) === 1
+  defp buckets(o, v) do
+    Enum.reduce(o, [], bucket(v))
   end
 
-  def who(v) do
+  defp bucket(v) do
     fn ({i, j}, x) ->
-      if Enum.all?(v, &Enum.member?(j, &1)) do
-        [i|x]
-      else
-        x
+      cond do
+        Enum.all?(v, &Enum.member?(j, &1)) ->
+          [i|x]
+        Enum.any?(v, &Enum.member?(j, &1)) ->
+          [i|x]
+        true ->
+          x
       end
     end
   end
@@ -61,11 +62,15 @@ defmodule LyraTest do
   end
 
   defp world(_, [], w) do
-    w
+    Set.new(w)
   end
   defp world(r, [x|y], w) do
     import Lyra.Worker, only: [resolve: 2]
     world(r, y, Map.update(w, resolve(select(r), x), [ x ], &[ x | &1 ]))
+  end
+
+  defp quater do
+    div(@size, 4)
   end
 
   defp uniform do
