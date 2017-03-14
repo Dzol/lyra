@@ -3,26 +3,24 @@ defmodule LyraTest do
   alias MapSet, as: Set
   @size 64
 
-  test "Ring nodes responsible for LESS upon ENTRY" do
-    r = ring(3); v = draw(&uniform/0, @size * 16)
+  test "On ENTRY ring nodes become responsible for LESS" do
+    r = ring(nodes: 3)
+    v = draw(&uniform/0, @size * 16)
 
-    b = world(r, v)
-    a = world(more(r, @size - 3), v)
+    old = world(r, v)
+    new = world(more(ring: r, entrants: @size - 3), v)
 
-    consistent!(a, b)
+    consistent!(new, old)
   end
 
-  test "Ring nodes responsible for MORE upon EXIT" do
-    r = ring(@size); v = draw(&uniform/0, @size * 16)
+  test "On EXIT ring nodes become responsible for MORE" do
+    r = ring(nodes: @size)
+    v = draw(&uniform/0, @size * 16)
 
-    b = world(r, v)
-    e = Enum.take(Enum.shuffle(r), quater())
-    for edge <- e do
-      :ok = Lyra.Worker.exit(edge)
-    end
-    a = world(r -- e, v)
+    old = world(r, v)
+    new = world(less(ring: r, leavers: quater()), v)
 
-    consistent!(b, a)
+    consistent!(old, new)
   end
 
   ## Ancillary
@@ -59,7 +57,7 @@ defmodule LyraTest do
     end
   end
 
-  defp more(r, n) do
+  defp more(ring: r, entrants: n) do
     m = n
     |> nodes()
     |> Enum.shuffle()
@@ -73,6 +71,9 @@ defmodule LyraTest do
     :ok = Lyra.Worker.enter(n, select(r)); [ n | ringify(r, more) ]
   end
 
+  defp ring(nodes: n) do
+    ring(n)
+  end
   defp ring(n) when n >= 3 do
     n
     |> nodes()
@@ -90,6 +91,14 @@ defmodule LyraTest do
   defp world(r, [x|y], w) do
     import Lyra.Worker, only: [resolve: 2]
     world(r, y, Map.update(w, resolve(select(r), x), [ x ], &[ x | &1 ]))
+  end
+
+  defp less(ring: r, leavers: l) when is_integer(l) do
+    e = Enum.take(Enum.shuffle(r), l)
+    for edge <- e do
+      :ok = Lyra.Worker.exit(edge)
+    end
+    r -- e
   end
 
   defp quater do
