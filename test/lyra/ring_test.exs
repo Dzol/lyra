@@ -6,8 +6,8 @@ defmodule RingTest do
 
     v = unique(@size * 100)
 
-    r0 = ring([], div(@size, 2)); w0 = world(r0, v)
-    r1 = ring(r0, div(@size, 2)); w1 = world(r1, v)
+    r0 = ring(    div(@size, 2)); w0 = world(r0, v)
+    r1 = more(r0, div(@size, 2)); w1 = world(r1, v)
 
     assert lattice?(w1, w0)
   end
@@ -16,7 +16,7 @@ defmodule RingTest do
 
     v = unique(@size * 100)
 
-    r0 = ring([],         @size); w0 = world(r0, v)
+    r0 = ring(        @size    ); w0 = world(r0, v)
     r1 = less(r0, div(@size, 2)); w1 = world(r1, v)
 
     assert lattice?(w0, w1)
@@ -31,7 +31,11 @@ defmodule RingTest do
     |> _unique()
   end
 
-  defp ring(r, n) do
+  defp ring(n) do
+    more([], n)
+  end
+
+  defp more(r, n) do
     for _ <- 1..n do
       {:ok, i} = Lyra.Worker.start_link(); i
     end
