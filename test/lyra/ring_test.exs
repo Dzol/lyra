@@ -66,7 +66,7 @@ defmodule RingTest do
     :ok = Lyra.Worker.enter(node, Enum.random(ring)); [ node | ring ]
   end
 
-  defp exit(node, ring) do
+  defp exit(node, ring) when ring != [] do
     :ok = Lyra.Worker.exit(node); ring -- [ node ]
   end
 
