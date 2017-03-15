@@ -12,6 +12,16 @@ defmodule RingTest do
     assert lattice?(w1, w0)
   end
 
+  test "Ring nodes become responsible for MORE when nodes EXIT" do
+
+    v = unique(@size * 100)
+
+    r0 = ring([],         @size); w0 = world(r0, v)
+    r1 = less(r0, div(@size, 2)); w1 = world(r1, v)
+
+    assert lattice?(w0, w1)
+  end
+
   ## Ancillary
 
   defp unique(x) do
@@ -27,6 +37,13 @@ defmodule RingTest do
     end
     |> Enum.shuffle()
     |> Enum.reduce(r, &enter/2)
+  end
+
+  defp less(r, n) do
+    r
+    |> Enum.shuffle()
+    |> Enum.take(n)
+    |> Enum.reduce(r, &exit/2)
   end
 
   defp world(ring, values) do
@@ -47,6 +64,10 @@ defmodule RingTest do
   end
   defp enter(node, ring) do
     :ok = Lyra.Worker.enter(node, Enum.random(ring)); [ node | ring ]
+  end
+
+  defp exit(node, ring) do
+    :ok = Lyra.Worker.exit(node); ring -- [ node ]
   end
 
   defp resolve(value, partial) do
