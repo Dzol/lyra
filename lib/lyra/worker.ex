@@ -69,21 +69,13 @@ defmodule Lyra.Worker do
   ## Ancillary
 
   defp predecessor(x, y, z) do
-    hop(x, y, z)
-  end
-
-  defp hop(x, y, z) do
     alias GenServer, as: Server
 
-    if not between?(x, y, z) do
-      {:ok, successor} = Server.call(z, :successor); hop(x, z, successor)
+    unless Lyra.Modular.epsilon?(x, exclude: point(y), include: point(z)) do
+      {:ok, successor} = Server.call(z, :successor); predecessor(x, z, successor)
     else
       {:ok, y}
     end
-  end
-
-  defp between?(x, y, z) do
-    Lyra.Modular.epsilon?(x, exclude: point(y), include: point(z))
   end
 
   defp successor(%__MODULE__{successor: x}) do
@@ -100,11 +92,11 @@ defmodule Lyra.Worker do
     |> digest()
   end
 
-  defp digest(x) when is_list(x) or is_binary(x) do
+  defp digest(x) do
     :crypto.bytes_to_integer(:crypto.hash(:sha, x))
   end
 
-  defp identifier(x) when is_pid(x) do
+  defp identifier(x) do
     :erlang.pid_to_list(x)
   end
 
