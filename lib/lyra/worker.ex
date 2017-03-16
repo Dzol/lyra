@@ -23,6 +23,8 @@ defmodule Lyra.Worker do
     GenServer.call(worker, {:find_successor, digest(value)})
   end
 
+  ## Ring Interface
+
   def find_successor(worker, node) when is_pid(worker) and is_pid(node) do # Find
     GenServer.call(worker, {:find_successor, point(node)})
   end
@@ -57,7 +59,7 @@ defmodule Lyra.Worker do
   def handle_call({:find_predecessor, subject}, _, state) do
     {:reply, predecessor_query(successor(state), subject), state}
   end
-  def handle_call({:predecessor, subject}, _, state) do
+  def handle_call(:successor, _, state) do
     {:reply, successor(state), state}
   end
   def handle_call({:enter, ring}, _, state) do
@@ -84,10 +86,10 @@ defmodule Lyra.Worker do
   defp predecessor_(oracle) do
     alias GenServer, as: Server
 
-    if Server.call(oracle, {:predecessor, point(self())}) == self() do
+    if Server.call(oracle, :successor) == self() do
       oracle
     else
-      predecessor_(Server.call(oracle, {:predecessor, point(self())})) ##
+      predecessor_(Server.call(oracle, :successor))
     end
   end
 
