@@ -1,25 +1,25 @@
 defmodule Lyra.Modular do
   @moduledoc """
 
-  Modular arithmetic on a _[u, v)_ interval
+  Modular arithmetic on a _(u, v]_ interval
 
   """
   @norm round(:math.pow(2, 160))
 
   @typedoc """
 
-  An interval like _[u, v)_ in mathematics
+  An interval like _(u, v]_ in mathematics
 
   """
-  @type interval :: [include: u :: integer, exclude: v :: integer]
+  @type interval :: [exclude: u :: integer, include: v :: integer]
 
   @doc """
 
-  This is like _x ∈ [u, v)_ under modular arithmetic
+  This is like _x ∈ (u, v]_ under modular arithmetic
 
   """
   @spec epsilon?(integer, interval) :: boolean
-  def epsilon?(x, include: u, exclude: v) do
+  def epsilon?(x, exclude: u, include: v) do
     _epsilon?(x, {u, v}, @norm)
   end
 
@@ -29,7 +29,7 @@ defmodule Lyra.Modular do
 
   """
   @spec epsilon?(integer, interval, integer) :: boolean
-  def epsilon?(x, [include: u, exclude: v], n) do
+  def epsilon?(x, [exclude: u, include: v], n) do
     _epsilon?(x, {u, v}, n)
   end
 
@@ -44,7 +44,7 @@ defmodule Lyra.Modular do
   end
 
   defp epsilon?(x, u, v, n) do
-    distance(u, x, n) < distance(u, v, n)
+    distance(v, x, n) < distance(v, u, n)
   end
 
   ## Ancillary
@@ -54,7 +54,7 @@ defmodule Lyra.Modular do
   end
 
   defp distance(a, b, n) do
-    Integer.mod(difference(a, b), n)
+    Integer.mod(difference(b, a), n)
   end
 
   defp difference(a, b) do

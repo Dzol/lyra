@@ -4,7 +4,7 @@ defmodule ModularTest do
   test "membership in an interval like [u, v) under modular arithmetic" do
     import Lyra.Modular, only: [epsilon?: 3]
     for {x, u, v, a} <- table() do
-      assert epsilon?(x, [include: u, exclude: v], norm()) == a
+      assert epsilon?(x, [exclude: u, include: v], norm()) == a
     end
   end
 
@@ -13,15 +13,15 @@ defmodule ModularTest do
   end
 
   defp table do
-    [{2, 2, 6, true},
+    [{2, 2, 6, false},
      {4, 2, 6, true},
-     {6, 2, 6, false},
+     {6, 2, 6, true},
      {0, 2, 6, false},
      ## Tricky interval
-     {6, 6, 2, true},
+     {6, 6, 2, false},
      {7, 6, 2, true},
      {1, 6, 2, true},
-     {2, 6, 2, false},
+     {2, 6, 2, true},
      {4, 6, 2, false},
      ## Tricky point
      {0, 6, 2, true},

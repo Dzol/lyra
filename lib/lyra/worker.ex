@@ -80,16 +80,16 @@ defmodule Lyra.Worker do
   ## Ancillary
 
   defp predecessor(%__MODULE__{successor: x}) do
-    _predecessor(x)
+    hop(x)
   end
 
-  defp _predecessor(oracle) do
+  defp hop(oracle) do
     alias GenServer, as: Server
 
     {:ok, successor} = Server.call(oracle, :successor); if self() == successor do
       {:ok, oracle}
     else
-      _predecessor(successor)
+      hop(successor)
     end
   end
 
@@ -114,7 +114,7 @@ defmodule Lyra.Worker do
   end
 
   defp between?(x, y, z) do
-    Lyra.Modular.epsilon?(x, include: point(y), exclude: point(z))
+    Lyra.Modular.epsilon?(x, exclude: point(y), include: point(z))
   end
 
   defp successor(%__MODULE__{successor: x}) do

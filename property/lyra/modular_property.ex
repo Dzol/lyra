@@ -8,7 +8,7 @@ defmodule ModularProperty do
     import Lyra.Modular, only: [epsilon?: 2]
     forall {u, v} <- bounds() do
       forall x <- point() do
-        ensure epsilon?(x, include: u, exclude: v) == correct(x, u, v)
+        ensure epsilon?(x, exclude: u, include: v) == correct(x, u, v)
       end
     end
   end
@@ -16,13 +16,13 @@ defmodule ModularProperty do
   ## Our Model
 
   defp correct(x, u, v) when u < v do
-    between?(x, include: u, exclude: v)
+    between?(x, include: u + 1, exclude: v + 1)
   end
   defp correct(_, u, v) when u === v do
     true
   end
   defp correct(x, u, v) when u > v do
-    between?(x, include: u, exclude: biggest()) or between?(x, include: 0, exclude: v)
+    between?(x, include: u + 1, exclude: biggest()) or between?(x, include: 0, exclude: v + 1)
   end
 
   ## Test Ancillaries
