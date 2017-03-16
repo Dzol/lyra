@@ -2,6 +2,16 @@ defmodule RingTest do
   use ExUnit.Case
   @size 16
 
+  test "ONE node responsible for ALL" do
+
+    v = unique(@size * 100)
+
+    [ n ] = ring(1); w = world([ n ], v)
+
+    assert Enum.count(w) === 1
+    assert Enum.count(w[ n ]) == @size * 100
+  end
+
   test "Ring nodes become responsible for LESS when nodes ENTER" do
 
     v = unique(@size * 100)
@@ -20,6 +30,16 @@ defmodule RingTest do
     r1 = less(r0, div(@size, 2)); w1 = world(r1, v)
 
     assert lattice?(w0, w1)
+  end
+
+  test "ONE remaining node responsible for ALL" do
+
+    v = unique(@size * 100); r = ring(@size)
+
+    [ n ] = less(r, @size - 1); w = world([ n ], v)
+
+    assert Enum.count(w) === 1
+    assert Enum.count(w[ n ]) == @size * 100
   end
 
   ## Ancillary
