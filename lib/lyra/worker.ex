@@ -60,7 +60,7 @@ defmodule Lyra.Worker do
     {:reply, predecessor_query(successor(state), subject), state}
   end
   def handle_call(:successor, _, state) do
-    {:reply, successor(state), state}
+    {:reply, {:ok, successor(state)}, state}
   end
   def handle_call({:enter, ring}, _, state) do
     {p, s} = older_siblings(ring)
@@ -68,7 +68,7 @@ defmodule Lyra.Worker do
     {:reply, :ok, successor(state, s)}
   end
   def handle_call(:exit, _, state) do
-    p = predecessor(state)
+    {:ok, p} = predecessor(state)
     send(p, {:exit, successor(state), unique()})
     {:reply, :ok, successor(state, self())}
   end
@@ -86,8 +86,8 @@ defmodule Lyra.Worker do
   defp _predecessor(oracle) do
     alias GenServer, as: Server
 
-    successor = Server.call(oracle, :successor); if self() == successor do
-      oracle
+    {:ok, successor} = Server.call(oracle, :successor); if self() == successor do
+      {:ok, oracle}
     else
       _predecessor(successor)
     end
