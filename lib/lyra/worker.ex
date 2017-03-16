@@ -23,28 +23,6 @@ defmodule Lyra.Worker do
     GenServer.call(worker, {:find_successor, digest(value)})
   end
 
-  ## Ring Interface
-
-  def find_successor(worker, node) when is_pid(worker) and is_pid(node) do # Find
-    GenServer.call(worker, {:find_successor, point(node)})
-  end
-  def find_successor(worker, value) when is_pid(worker) and is_list(value) or is_binary(value) do
-    GenServer.call(worker, {:find_successor, digest(value)})
-  end
-  def find_successor(worker, value) when is_pid(worker) and is_integer(value) do
-    GenServer.call(worker, {:find_successor, value})
-  end
-
-  def find_predecessor(worker, node) when is_pid(worker) and is_pid(node) do # Find
-    GenServer.call(worker, {:find_predecessor, point(node)})
-  end
-  def find_predecessor(worker, value) when is_pid(worker) and is_list(value) or is_binary(value) do
-    GenServer.call(worker, {:find_predecessor, digest(value)})
-  end
-  def find_predecessor(worker, value) when is_pid(worker) and is_integer(value) do
-    GenServer.call(worker, {:find_predecessor, value})
-  end
-
   ## Generic Server Machinery Interface
 
   def init([]) do
@@ -64,14 +42,17 @@ defmodule Lyra.Worker do
     end
     {:reply, s, state}
   end
-  def handle_call({:find_predecessor, subject}, _, state) do
-    {:reply, predecessor_query(successor(state), subject), state}
+  def handle_call({:predecessor, subject}, _, state) do
+    {:reply, predecessor(subject, self(), successor(state)), state}
   end
   def handle_call(:successor, _, state) do
     {:reply, {:ok, successor(state)}, state}
   end
   def handle_call({:enter, ring}, _, state) do
-    {p, s} = older_siblings(ring)
+    alias GenServer, as: Server
+
+    {:ok, p} = Server.call(ring, {:predecessor, point(self())})
+    {:ok, s} = Server.call(p, :successor)
     send(p, {:enter, self(), unique()})
     {:reply, :ok, successor(state, s)}
   end
@@ -98,18 +79,6 @@ defmodule Lyra.Worker do
       {:ok, successor} = Server.call(z, :successor); hop(x, z, successor)
     else
       {:ok, y}
-    end
-  end
-
-  defp older_siblings(ring) do
-    {find_predecessor(ring, self()), find_successor(ring, self())}
-  end
-
-  defp predecessor_query(successor, subject) do
-    if between?(subject, self(), successor) do
-      self()
-    else
-      find_predecessor(successor, subject)
     end
   end
 
