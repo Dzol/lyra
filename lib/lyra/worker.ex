@@ -20,7 +20,7 @@ defmodule Lyra.Worker do
   end
 
   def resolve(worker, value) when is_pid(worker) and is_list(value) or is_binary(value) do
-    GenServer.call(worker, {:find_successor, digest(value)})
+    GenServer.call(worker, {:successor, digest(value)})
   end
 
   ## Generic Server Machinery Interface
@@ -31,23 +31,6 @@ defmodule Lyra.Worker do
     }
   end
 
-  def handle_call({:find_successor, subject}, _, state) do
-    alias GenServer, as: Server
-
-    {:ok, p} = predecessor(subject, self(), successor(state))
-    {:ok, s} = unless p == self() do
-      Server.call(p, :successor)
-    else
-      {:ok, successor(state)}
-    end
-    {:reply, s, state}
-  end
-  def handle_call({:predecessor, subject}, _, state) do
-    {:reply, predecessor(subject, self(), successor(state)), state}
-  end
-  def handle_call(:successor, _, state) do
-    {:reply, {:ok, successor(state)}, state}
-  end
   def handle_call({:enter, ring}, _, state) do
     alias GenServer, as: Server
 
@@ -60,6 +43,23 @@ defmodule Lyra.Worker do
     {:ok, p} = predecessor(point(self()), self(), successor(state))
     send(p, {:exit, successor(state), unique()})
     {:reply, :ok, successor(state, self())}
+  end
+  def handle_call(:successor, _, state) do
+    {:reply, {:ok, successor(state)}, state}
+  end
+  def handle_call({:successor, subject}, _, state) do
+    alias GenServer, as: Server
+
+    {:ok, p} = predecessor(subject, self(), successor(state))
+    {:ok, s} = unless p == self() do
+      Server.call(p, :successor)
+    else
+      {:ok, successor(state)}
+    end
+    {:reply, s, state}
+  end
+  def handle_call({:predecessor, subject}, _, state) do
+    {:reply, predecessor(subject, self(), successor(state)), state}
   end
 
   def handle_info({x, vertex, _}, state) when x == :enter or x == :exit do
