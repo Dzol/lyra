@@ -54,7 +54,15 @@ defmodule Lyra.Worker do
   end
 
   def handle_call({:find_successor, subject}, _, state) do
-    {:reply, successor_query(successor(state), subject), state}
+    alias GenServer, as: Server
+
+    {:ok, p} = predecessor(subject, self(), successor(state))
+    {:ok, s} = unless p == self() do
+      Server.call(p, :successor)
+    else
+      {:ok, successor(state)}
+    end
+    {:reply, s, state}
   end
   def handle_call({:find_predecessor, subject}, _, state) do
     {:reply, predecessor_query(successor(state), subject), state}
@@ -68,7 +76,7 @@ defmodule Lyra.Worker do
     {:reply, :ok, successor(state, s)}
   end
   def handle_call(:exit, _, state) do
-    {:ok, p} = predecessor(state)
+    {:ok, p} = predecessor(point(self()), self(), successor(state))
     send(p, {:exit, successor(state), unique()})
     {:reply, :ok, successor(state, self())}
   end
@@ -79,30 +87,22 @@ defmodule Lyra.Worker do
 
   ## Ancillary
 
-  defp predecessor(%__MODULE__{successor: x}) do
-    hop(x)
+  defp predecessor(x, y, z) do
+    hop(x, y, z)
   end
 
-  defp hop(oracle) do
+  defp hop(x, y, z) do
     alias GenServer, as: Server
 
-    {:ok, successor} = Server.call(oracle, :successor); if self() == successor do
-      {:ok, oracle}
+    if not between?(x, y, z) do
+      {:ok, successor} = Server.call(z, :successor); hop(x, z, successor)
     else
-      hop(successor)
+      {:ok, y}
     end
   end
 
   defp older_siblings(ring) do
     {find_predecessor(ring, self()), find_successor(ring, self())}
-  end
-
-  defp successor_query(successor, subject) do
-    if between?(subject, self(), successor) do
-      successor
-    else
-      find_successor(successor, subject)
-    end
   end
 
   defp predecessor_query(successor, subject) do
