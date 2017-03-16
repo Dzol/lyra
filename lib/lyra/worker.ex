@@ -80,16 +80,16 @@ defmodule Lyra.Worker do
   ## Ancillary
 
   defp predecessor(%__MODULE__{successor: x}) do
-    predecessor_(x)
+    _predecessor(x)
   end
 
-  defp predecessor_(oracle) do
+  defp _predecessor(oracle) do
     alias GenServer, as: Server
 
-    if Server.call(oracle, :successor) == self() do
+    successor = Server.call(oracle, :successor); if self() == successor do
       oracle
     else
-      predecessor_(Server.call(oracle, :successor))
+      _predecessor(successor)
     end
   end
 
