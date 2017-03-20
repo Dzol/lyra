@@ -1,18 +1,19 @@
 defmodule Lyra do
   @moduledoc """
-  Documentation for Lyra.
+  A Chord in Elixir.
   """
 
   @doc """
-  Hello world.
-
-  ## Examples
-
-      iex> Lyra.hello
-      :world
-
+  Enter a ring.
   """
-  def hello do
-    :world
+  def enter do
+    :ok
+  end
+
+  @doc """
+  Exit the ring.
+  """
+  def exit do
+    :ok
   end
 end
