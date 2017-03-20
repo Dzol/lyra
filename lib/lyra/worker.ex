@@ -34,12 +34,12 @@ defmodule Lyra.Worker do
   def handle_call({:enter, ring}, _, state) do
     {:ok, p} = call(ring, {:predecessor, point(self())})
     {:ok, s} = call(p, :successor)
-    cast(p, {:enter, self(), unique()})
+    :ok = call(p, {:enter, self(), unique()})
     {:reply, :ok, successor(state, s)}
   end
   def handle_call(:exit, _, state) do
     {:ok, p} = predecessor(point(self()), self(), successor(state))
-    cast(p, {:exit, successor(state), unique()})
+    :ok = call(p, {:exit, successor(state), unique()})
     {:reply, :ok, successor(state, self())}
   end
   def handle_call(:successor, _, state) do
@@ -57,9 +57,8 @@ defmodule Lyra.Worker do
   def handle_call({:predecessor, subject}, _, state) do
     {:reply, predecessor(subject, self(), successor(state)), state}
   end
-
-  def handle_cast({x, vertex, _}, state) when x == :enter or x == :exit do
-    {:noreply, successor(state, vertex)}
+  def handle_call({x, vertex, _}, _, state) when x == :enter or x == :exit do
+    {:reply, :ok, successor(state, vertex)}
   end
 
   ## Ancillary
