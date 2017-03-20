@@ -42,9 +42,6 @@ defmodule Lyra.Worker do
     :ok = call(p, {:exit, successor(state), unique()})
     {:reply, :ok, successor(state, self())}
   end
-  def handle_call(:successor, _, state) do
-    {:reply, {:ok, successor(state)}, state}
-  end
   def handle_call({:successor, subject}, _, state) do
     {:ok, p} = predecessor(subject, self(), successor(state))
     {:ok, s} = unless p == self() do
@@ -54,11 +51,14 @@ defmodule Lyra.Worker do
     end
     {:reply, s, state}
   end
-  def handle_call({:predecessor, subject}, _, state) do
-    {:reply, predecessor(subject, self(), successor(state)), state}
-  end
   def handle_call({x, vertex, _}, _, state) when x == :enter or x == :exit do
     {:reply, :ok, successor(state, vertex)}
+  end
+  def handle_call(:successor, _, state) do
+    {:reply, {:ok, successor(state)}, state}
+  end
+  def handle_call({:predecessor, subject}, _, state) do
+    {:reply, predecessor(subject, self(), successor(state)), state}
   end
 
   ## Ancillary
