@@ -1,26 +1,26 @@
 defmodule Lyra.Worker do
-  use GenServer
+  import GenServer, only: [start_link: 2, call: 2]
 
   defstruct [:successor]
 
   ## OTP Supervision Interface
 
   def start_link do
-    GenServer.start_link(__MODULE__, [])
+    start_link(__MODULE__, [])
   end
 
   ## Client Interface
 
   def enter(worker, ring) when is_pid(worker) and is_pid(ring) do
-    GenServer.call(worker, {:enter, ring})
+    call(worker, {:enter, ring})
   end
 
   def exit(worker) when is_pid(worker) do
-    GenServer.call(worker, :exit)
+    call(worker, :exit)
   end
 
   def resolve(worker, value) when is_pid(worker) and is_list(value) or is_binary(value) do
-    GenServer.call(worker, {:successor, digest(value)})
+    call(worker, {:successor, digest(value)})
   end
 
   ## Generic Server Machinery Interface
@@ -32,10 +32,8 @@ defmodule Lyra.Worker do
   end
 
   def handle_call({:enter, ring}, _, state) do
-    alias GenServer, as: Server
-
-    {:ok, p} = Server.call(ring, {:predecessor, point(self())})
-    {:ok, s} = Server.call(p, :successor)
+    {:ok, p} = call(ring, {:predecessor, point(self())})
+    {:ok, s} = call(p, :successor)
     send(p, {:enter, self(), unique()})
     {:reply, :ok, successor(state, s)}
   end
@@ -48,11 +46,9 @@ defmodule Lyra.Worker do
     {:reply, {:ok, successor(state)}, state}
   end
   def handle_call({:successor, subject}, _, state) do
-    alias GenServer, as: Server
-
     {:ok, p} = predecessor(subject, self(), successor(state))
     {:ok, s} = unless p == self() do
-      Server.call(p, :successor)
+      call(p, :successor)
     else
       {:ok, successor(state)}
     end
@@ -69,10 +65,8 @@ defmodule Lyra.Worker do
   ## Ancillary
 
   defp predecessor(x, y, z) do
-    alias GenServer, as: Server
-
     unless Lyra.Modular.epsilon?(x, exclude: point(y), include: point(z)) do
-      {:ok, successor} = Server.call(z, :successor); predecessor(x, z, successor)
+      {:ok, successor} = call(z, :successor); predecessor(x, z, successor)
     else
       {:ok, y}
     end
