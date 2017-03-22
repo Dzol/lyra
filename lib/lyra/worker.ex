@@ -1,7 +1,7 @@
 defmodule Lyra.Worker do
-  import GenServer, only: [start_link: 2, call: 2, cast: 2]
+  import GenServer, only: [start_link: 2, call: 2, reply: 2]
 
-  defstruct [:successor]
+  defstruct [:successor, :client]
 
   ## OTP Supervision Interface
 
@@ -31,6 +31,9 @@ defmodule Lyra.Worker do
     }
   end
 
+  def handle_call(:prompt, {y, _} = x, state) do
+    reply(x, :ok) && call(y, segment(state)) && {:noreply, state}
+  end
   def handle_call({:enter, ring}, _, state) do
     {:ok, p} = call(ring, {:predecessor, point(self())})
     {:ok, s} = call(p, :successor)
@@ -62,6 +65,11 @@ defmodule Lyra.Worker do
   end
 
   ## Ancillary
+
+  defp segment(state) do
+    {:ok, p} = predecessor(point(self()), self(), successor(state))
+    [exclude: point(p), include: point(self())]
+  end
 
   defp predecessor(x, y, z) do
     unless Lyra.Modular.epsilon?(x, exclude: point(y), include: point(z)) do
