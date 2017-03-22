@@ -9,7 +9,8 @@ defmodule Lyra.Mixfile do
      start_permanent: Mix.env == :prod,
      deps: deps(),
      aliases: aliases(),
-     test_pattern: "*_{test,property}.exs"] ++ cover()
+     test_pattern: "*_{test,property}.exs",
+     docs: documentation()] ++ cover()
   end
 
   def application do
@@ -27,6 +28,10 @@ defmodule Lyra.Mixfile do
 
   defp aliases do
     [property: [&test/1, "test property/"]]
+  end
+
+  defp documentation do
+    [output: "docs"]
   end
 
   defp cover do

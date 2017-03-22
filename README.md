@@ -6,6 +6,6 @@
 
 # Lyra
 
-A [Chord][0] in Elixir.
+[Lyra](https://dzol.github.io/lyra/) is a [Chord][0] in Elixir.
 
 [0]: https://en.wikipedia.org/wiki/Chord_(peer-to-peer)
