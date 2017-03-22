@@ -32,11 +32,12 @@ defmodule Lyra.Worker do
   end
 
   def handle_call(:prompt, {y, _} = x, state) do
-    reply(x, :ok) && call(y, segment(state)) && {:noreply, state}
+    reply(x, :ok) && prompt(client(state, y)) && {:noreply, client(state, y)}
   end
   def handle_call({:enter, ring}, _, state) do
     {:ok, p} = call(ring, {:predecessor, point(self())})
     {:ok, s} = call(p, :successor)
+    :ok =  prompt(state)
     :ok = call(p, {:enter, self(), unique()})
     {:reply, :ok, successor(state, s)}
   end
@@ -55,6 +56,7 @@ defmodule Lyra.Worker do
     {:reply, s, state}
   end
   def handle_call({x, vertex, _}, _, state) when x == :enter or x == :exit do
+    :ok = prompt(state)
     {:reply, :ok, successor(state, vertex)}
   end
   def handle_call(:successor, _, state) do
@@ -79,12 +81,28 @@ defmodule Lyra.Worker do
     end
   end
 
+  defp prompt(state) do
+    if client(state) do
+      :ok = call(client(state), {:prompt, segment(state)})
+    else
+      :ok
+    end
+  end
+
   defp successor(%__MODULE__{successor: x}) do
     x
   end
 
   defp successor(x = %__MODULE__{}, y) do
     %{x | successor: y}
+  end
+
+  defp client(%__MODULE__{client: x}) do
+    x
+  end
+
+  defp client(x = %__MODULE__{}, y) do
+    %{x | client: y}
   end
 
   defp point(x) when is_pid(x) do
