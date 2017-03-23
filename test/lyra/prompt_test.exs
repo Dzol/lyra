@@ -12,7 +12,7 @@ defmodule PromptTest do
     ## RESPOND
   end
 
-  test "prompt on ring ENTRY" do
+  test "prompt on ring ENTRY and EXIT" do
 
     import GenServer, only: [reply: 2]
 
@@ -36,6 +36,16 @@ defmodule PromptTest do
     reply(b, :ok)
 
     assert Task.await(outcome) == :success
+
+    outcome = Task.async(split(n))
+
+    assert_receive {_, i = {^n, _}, {:prompt, [exclude: _, include: _]}}
+    reply(i, :ok)
+
+    assert_receive {_, j = {^m, _}, {:prompt, [exclude: _, include: _]}}
+    reply(j, :ok)
+
+    assert Task.await(outcome) == :success
   end
 
   ## Ancillary
@@ -46,7 +56,17 @@ defmodule PromptTest do
 
   defp merge(x, y) do
     fn ->
-      if Lyra.Worker.enter(x, y) do
+      if Lyra.Worker.enter(x, y) == :ok do
+        :success
+      else
+        :failure
+      end
+    end
+  end
+
+  defp split(x) do
+    fn ->
+      if Lyra.Worker.exit(x) == :ok do
         :success
       else
         :failure

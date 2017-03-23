@@ -1,7 +1,7 @@
 defmodule Lyra.Worker do
   import GenServer, only: [start_link: 2, call: 2, reply: 2]
 
-  defstruct [:successor, :client]
+  defstruct [:successor, :client, :predecessor]
 
   ## OTP Supervision Interface
 
@@ -27,7 +27,7 @@ defmodule Lyra.Worker do
 
   def init([]) do
     {:ok,
-     %__MODULE__{successor: self()}
+     %__MODULE__{successor: self(), predecessor: self()}
     }
   end
 
@@ -39,10 +39,11 @@ defmodule Lyra.Worker do
     {:ok, s} = call(p, :successor)
     :ok =  prompt(state)
     :ok = call(p, {:enter, self(), unique()})
-    {:reply, :ok, successor(state, s)}
+    {:reply, :ok, predecessor(successor(state, s), p)}
   end
   def handle_call(:exit, _, state) do
     {:ok, p} = predecessor(point(self()), self(), successor(state))
+    :ok =  prompt(state)
     :ok = call(p, {:exit, successor(state), unique()})
     {:reply, :ok, successor(state, self())}
   end
@@ -57,7 +58,7 @@ defmodule Lyra.Worker do
   end
   def handle_call({x, vertex, _}, _, state) when x == :enter or x == :exit do
     :ok = prompt(state)
-    {:reply, :ok, successor(state, vertex)}
+    {:reply, :ok, successor(state, vertex)} ##
   end
   def handle_call(:successor, _, state) do
     {:reply, {:ok, successor(state)}, state}
@@ -69,8 +70,7 @@ defmodule Lyra.Worker do
   ## Ancillary
 
   defp segment(state) do
-    {:ok, p} = predecessor(point(self()), self(), successor(state))
-    [exclude: point(p), include: point(self())]
+    [exclude: point(predecessor(state)), include: point(self())]
   end
 
   defp predecessor(x, y, z) do
@@ -83,7 +83,7 @@ defmodule Lyra.Worker do
 
   defp prompt(state) do
     if client(state) do
-      :ok = call(client(state), {:prompt, segment(state)})
+      call(client(state), {:prompt, segment(state)})
     else
       :ok
     end
@@ -95,6 +95,14 @@ defmodule Lyra.Worker do
 
   defp successor(x = %__MODULE__{}, y) do
     %{x | successor: y}
+  end
+
+  defp predecessor(%__MODULE__{predecessor: x}) do
+    x
+  end
+
+  defp predecessor(x = %__MODULE__{}, y) do
+    %{x | predecessor: y}
   end
 
   defp client(%__MODULE__{client: x}) do
