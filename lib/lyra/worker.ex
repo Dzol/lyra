@@ -27,10 +27,11 @@ defmodule Lyra.Worker do
 
   def init([]) do
     {:ok,
-     %__MODULE__{successor: self(), predecessor: self()}
+     %__MODULE__{} |> successor(self()) |> predecessor(self())
     }
   end
 
+  ## These originate from outside the ring
   def handle_call(:prompt, {y, _} = x, state) do
     reply(x, :ok) && prompt(client(state, y)) && {:noreply, client(state, y)}
   end
@@ -57,6 +58,7 @@ defmodule Lyra.Worker do
     end
     {:reply, s, state}
   end
+  ## These originate from inside the ring (though ultimately from outside)
   def handle_call({:precede, vertex, _}, _, state) do
     :ok = prompt(state)
     {:reply, :ok, successor(state, vertex)}
