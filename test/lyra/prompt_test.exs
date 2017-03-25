@@ -16,39 +16,53 @@ defmodule PromptTest do
 
     import GenServer, only: [reply: 2]
 
-    [ n ] = ring()
-    [ m ] = ring()
+    [ i ] = ring()
+    [ j ] = ring()
+    [ k ] = ring()
 
-    :ok = Lyra.prompt(n)
-    :ok = Lyra.prompt(m)
-
-    assert_receive {_, x = {^n, _}, {:prompt, [exclude: _, include: _]}}
-    assert_receive {_, y = {^m, _}, {:prompt, [exclude: _, include: _]}}
-
+    :ok = Lyra.prompt(i)
+    :ok = Lyra.prompt(j)
+    :ok = Lyra.prompt(k)
+    assert_receive {_, x = {^i, _}, {:prompt, [exclude: _, include: _]}}
+    assert_receive {_, y = {^j, _}, {:prompt, [exclude: _, include: _]}}
+    assert_receive {_, z = {^k, _}, {:prompt, [exclude: _, include: _]}}
     reply(x, :ok)
     reply(y, :ok)
+    reply(z, :ok)
 
-    outcome = Task.async(merge(n, m))
-
-    assert_receive {_, a = {^n, _}, {:prompt, [exclude: _, include: _]}}
+    outcome = Task.async(merge(j, i))
+    assert_receive {_, a = {^j, _}, {:prompt, [exclude: _, include: _]}}
     reply(a, :ok)
-    assert_receive {_, b = {^m, _}, {:prompt, [exclude: _, include: _]}}
+    assert_receive {_, b = {^i, _}, {:prompt, [exclude: _, include: _]}}
     reply(b, :ok)
-
     assert Task.await(outcome) == :success
 
-    outcome = Task.async(split(n))
+    outcome = Task.async(merge(k, j))
+    assert_receive {_, c = {^k, _}, {:prompt, [exclude: _, include: _]}}
+    reply(c, :ok)
+    assert_receive {_, d = {l, _}, {:prompt, [exclude: _, include: _]}}
+    reply(d, :ok)
+    assert successor(k) == l
+    assert Task.await(outcome) == :success
 
-    assert_receive {_, i = {^n, _}, {:prompt, [exclude: _, include: _]}}
-    reply(i, :ok)
-
-    assert_receive {_, j = {^m, _}, {:prompt, [exclude: _, include: _]}}
-    reply(j, :ok)
-
+    outcome = Task.async(split(i))
+    m = successor(i)
+    assert_receive {_, e = {^i, _}, {:prompt, [exclude: _, include: _]}}
+    reply(e, :ok)
+    assert_receive {_, f = {^m, _}, {:prompt, [exclude: _, include: _]}}
+    reply(f, :ok)
     assert Task.await(outcome) == :success
   end
 
   ## Ancillary
+
+  defp successor(x) do
+    _successor(:sys.get_state(x))
+  end
+
+  defp _successor(%Lyra.Worker{successor: x}) do
+    x
+  end
 
   defp ring do
     ring(1)

@@ -60,10 +60,10 @@ defmodule Lyra.Worker do
   end
   ## These originate from inside the ring (though ultimately from outside)
   def handle_call({:precede, vertex, _}, _, state) do
-    :ok = prompt(state)
     {:reply, :ok, successor(state, vertex)}
   end
   def handle_call({:succeed, vertex, _}, _, state) do
+    :ok = prompt(state)
     {:reply, :ok, predecessor(state, vertex)}
   end
   def handle_call(:successor, _, state) do
