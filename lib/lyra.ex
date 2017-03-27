@@ -13,6 +13,13 @@ defmodule Lyra do
   end
 
   @doc """
+  Query Lyra for a Vertex.
+  """
+  def query(x, y) when is_pid(x) and is_list(y) or is_binary(y) do
+    Lyra.Worker.resolve(x, y)
+  end
+
+  @doc """
   Enter a ring.
   """
   def enter do

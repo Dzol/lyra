@@ -1,7 +1,7 @@
 defmodule Lyra.Worker do
-  import GenServer, only: [start_link: 2, call: 2, reply: 2]
-
   defstruct [:successor, :client, :predecessor]
+
+  import GenServer, only: [start_link: 2, call: 2, reply: 2]
 
   ## OTP Supervision Interface
 
@@ -9,7 +9,7 @@ defmodule Lyra.Worker do
     start_link(__MODULE__, [])
   end
 
-  ## Client Interface
+  ## Application Interface
 
   def enter(worker, ring) when is_pid(worker) and is_pid(ring) do
     call(worker, {:enter, ring})
@@ -18,6 +18,8 @@ defmodule Lyra.Worker do
   def exit(worker) when is_pid(worker) do
     call(worker, :exit)
   end
+
+  ## Client Interface
 
   def resolve(worker, value) when is_pid(worker) and is_list(value) or is_binary(value) do
     call(worker, {:successor, digest(value)})
@@ -33,21 +35,23 @@ defmodule Lyra.Worker do
 
   ## These originate from outside the ring
   def handle_call(:prompt, {y, _} = x, state) do
-    reply(x, :ok) && prompt(client(state, y)) && {:noreply, client(state, y)}
+    reply(x, :ok)
+    :ok = prompt(y, segment(state))
+    {:noreply, client(state, y)}
   end
-  def handle_call({:enter, ring}, _, state) do
-    {:ok, p} = call(ring, {:predecessor, point(self())})
+  def handle_call({:enter, oracle}, _, state) do
+    {:ok, p} = call(oracle, {:predecessor, point(self())})
     {:ok, s} = call(p, :successor)
-    :ok =  prompt(state)
+    :ok = prompt(client(state), segment(state))
     :ok = call(p, {:precede, self(), unique()})
     :ok = call(s, {:succeed, self(), unique()})
-    {:reply, :ok, predecessor(successor(state, s), p)}
+    {:reply, :ok, state |> successor(s) |> predecessor(p)}
   end
   def handle_call(:exit, _, state) do
-    :ok =  prompt(state)
+    :ok = prompt(client(state), segment(state))
     :ok = call(predecessor(state), {:precede, successor(state), unique()})
     :ok = call(successor(state), {:succeed, predecessor(state), unique()})
-    {:reply, :ok, successor(state, self())}
+    {:reply, :ok, state |> successor(self())}
   end
   def handle_call({:successor, subject}, _, state) do
     {:ok, p} = predecessor(subject, self(), successor(state))
@@ -63,7 +67,7 @@ defmodule Lyra.Worker do
     {:reply, :ok, successor(state, vertex)}
   end
   def handle_call({:succeed, vertex, _}, _, state) do
-    :ok = prompt(state)
+    :ok = prompt(client(state), segment(state))
     {:reply, :ok, predecessor(state, vertex)}
   end
   def handle_call(:successor, _, state) do
@@ -71,6 +75,15 @@ defmodule Lyra.Worker do
   end
   def handle_call({:predecessor, subject}, _, state) do
     {:reply, predecessor(subject, self(), successor(state)), state}
+  end
+
+  ## Lyra Client Interface
+
+  defp prompt(x, y) when is_pid(x) do
+    call(x, {:prompt, y})
+  end
+  defp prompt(_, _) do
+    :ok
   end
 
   ## Ancillary
@@ -84,14 +97,6 @@ defmodule Lyra.Worker do
       {:ok, successor} = call(z, :successor); predecessor(x, z, successor)
     else
       {:ok, y}
-    end
-  end
-
-  defp prompt(state) do
-    if client(state) do
-      call(client(state), {:prompt, segment(state)})
-    else
-      :ok
     end
   end
 
