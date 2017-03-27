@@ -1,6 +1,7 @@
 defmodule LyraProperty do
   use ExUnit.Case
   use EQC.ExUnit
+  @bits Application.fetch_env!(:lyra, :digest)[:size]
 
   describe "Lyra.Worker.*" do
 
@@ -32,7 +33,7 @@ defmodule LyraProperty do
   ## Test Ancillaries
 
   defp natural do
-    let i <- largebinary(div(160, 8)) do
+    let i <- largebinary(div(@bits, 8)) do
       abs(:crypto.bytes_to_integer(i))
     end
   end

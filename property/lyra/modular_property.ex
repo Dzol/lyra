@@ -2,7 +2,7 @@ defmodule ModularProperty do
   use ExUnit.Case
   use EQC.ExUnit
 
-  @norm round(:math.pow(2, 160))
+  @norm round(:math.pow(2, Application.fetch_env!(:lyra, :digest)[:size]))
 
   property "interval membership under modular arithmetic" do
     import Lyra.Modular, only: [epsilon?: 2]

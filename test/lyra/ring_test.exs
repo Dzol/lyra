@@ -1,5 +1,6 @@
 defmodule RingTest do
   use ExUnit.Case
+  @bits Application.fetch_env!(:lyra, :digest)[:size]
   @size 16
 
   test "ONE node responsible for ALL" do
@@ -46,7 +47,7 @@ defmodule RingTest do
 
   defp unique(x) do
     for _ <- 1..x do
-      :crypto.strong_rand_bytes(div(160, 8))
+      :crypto.strong_rand_bytes(div(@bits, 8))
     end
     |> _unique()
   end

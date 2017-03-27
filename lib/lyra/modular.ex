@@ -4,7 +4,7 @@ defmodule Lyra.Modular do
   Modular arithmetic on a _(u, v]_ interval
 
   """
-  @norm round(:math.pow(2, 160))
+  @norm round(:math.pow(2, Application.fetch_env!(:lyra, :digest)[:size]))
 
   @typedoc """
 
