@@ -16,7 +16,7 @@ defmodule Lyra do
   Query Lyra for a vertex.
   """
   def query(vertex, name) when is_pid(vertex) and is_list(name) or is_binary(name) do
-    Lyra.Worker.resolve(vertex, name)
+    Lyra.Worker.query(vertex, name)
   end
 
   @doc """

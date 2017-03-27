@@ -25,7 +25,7 @@ defmodule Lyra.Worker do
     call(vertex, :prompt)
   end
 
-  def resolve(vertex, name) when is_pid(vertex) and is_list(name) or is_binary(name) do
+  def query(vertex, name) when is_pid(vertex) and is_list(name) or is_binary(name) do
     call(vertex, {:successor, digest(name)})
   end
 

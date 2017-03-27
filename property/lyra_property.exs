@@ -3,22 +3,21 @@ defmodule LyraProperty do
   use EQC.ExUnit
 
   describe "Lyra.Worker.*" do
-    alias Lyra.Worker, as: Node
 
     property "resolution to same node against a ring of three" do
       ## Given:
-      {:ok, a} = Node.start_link()
-      {:ok, b} = Node.start_link()
-      {:ok, c} = Node.start_link()
+      {:ok, a} = Lyra.Worker.start_link()
+      {:ok, b} = Lyra.Worker.start_link()
+      {:ok, c} = Lyra.Worker.start_link()
 
-      :ok = Node.enter(b, a)
-      :ok = Node.enter(c, b)
+      :ok = Lyra.Worker.enter(b, a)
+      :ok = Lyra.Worker.enter(c, b)
 
       ## When:
       forall x <- natural() do
-        a_ = Node.resolve(a, stringify(x))
-        b_ = Node.resolve(b, stringify(x))
-        c_ = Node.resolve(c, stringify(x))
+        a_ = Lyra.query(a, stringify(x))
+        b_ = Lyra.query(b, stringify(x))
+        c_ = Lyra.query(c, stringify(x))
 
         collect a: a_, b: b_, c: c_ do
 

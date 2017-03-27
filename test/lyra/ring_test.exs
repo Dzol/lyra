@@ -71,7 +71,7 @@ defmodule RingTest do
   end
 
   defp world(ring, values) do
-    Enum.reduce(values, Enum.reduce(ring, %{}, &Map.put(&2, &1, [])), &resolve/2)
+    Enum.reduce(values, Enum.reduce(ring, %{}, &Map.put(&2, &1, [])), &query/2)
   end
 
   defp lattice?(x, y) do
@@ -94,8 +94,8 @@ defmodule RingTest do
     :ok = Lyra.Worker.exit(node); ring -- [ node ]
   end
 
-  defp resolve(value, partial) do
-    Map.update!(partial, Lyra.Worker.resolve(Enum.random(Map.keys(partial)), value), &[ value | &1 ])
+  defp query(value, partial) do
+    Map.update!(partial, Lyra.query(Enum.random(Map.keys(partial)), value), &[ value | &1 ])
   end
 
   defp lattice?([], y, z) do
