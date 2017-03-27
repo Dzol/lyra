@@ -6,17 +6,17 @@ defmodule Lyra do
   import GenServer, only: [call: 2]
 
   @doc """
-  Prompt Lyra for changes on the Ring.
+  Prompt Lyra for changes.
   """
-  def prompt(x) do
-    call(x, :prompt)
+  def prompt(vertex) do
+    Lyra.Worker.prompt(vertex)
   end
 
   @doc """
-  Query Lyra for a Vertex.
+  Query Lyra for a vertex.
   """
-  def query(x, y) when is_pid(x) and is_list(y) or is_binary(y) do
-    Lyra.Worker.resolve(x, y)
+  def query(vertex, name) when is_pid(vertex) and is_list(name) or is_binary(name) do
+    Lyra.Worker.resolve(vertex, name)
   end
 
   @doc """

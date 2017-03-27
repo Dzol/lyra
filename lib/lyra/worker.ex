@@ -11,18 +11,31 @@ defmodule Lyra.Worker do
 
   ## Application Interface
 
-  def enter(worker, ring) when is_pid(worker) and is_pid(ring) do
-    call(worker, {:enter, ring})
+  def enter(vertex, oracle) when is_pid(vertex) and is_pid(oracle) do
+    call(vertex, {:enter, oracle})
   end
 
-  def exit(worker) when is_pid(worker) do
-    call(worker, :exit)
+  def exit(vertex) when is_pid(vertex) do
+    call(vertex, :exit)
   end
 
-  ## Client Interface
+  ## Interface for Client
 
-  def resolve(worker, value) when is_pid(worker) and is_list(value) or is_binary(value) do
-    call(worker, {:successor, digest(value)})
+  def prompt(vertex) when is_pid(vertex) do
+    call(vertex, :prompt)
+  end
+
+  def resolve(vertex, name) when is_pid(vertex) and is_list(name) or is_binary(name) do
+    call(vertex, {:successor, digest(name)})
+  end
+
+  ## Interface for Lyra
+
+  defp prompt(client, change) when is_pid(client) do
+    call(client, {:prompt, change})
+  end
+  defp prompt(_, _) do
+    :ok
   end
 
   ## Generic Server Machinery Interface
@@ -77,28 +90,7 @@ defmodule Lyra.Worker do
     {:reply, predecessor(subject, self(), successor(state)), state}
   end
 
-  ## Lyra Client Interface
-
-  defp prompt(x, y) when is_pid(x) do
-    call(x, {:prompt, y})
-  end
-  defp prompt(_, _) do
-    :ok
-  end
-
-  ## Ancillary
-
-  defp segment(state) do
-    [exclude: point(predecessor(state)), include: point(self())]
-  end
-
-  defp predecessor(x, y, z) do
-    unless Lyra.Modular.epsilon?(x, exclude: point(y), include: point(z)) do
-      {:ok, successor} = call(z, :successor); predecessor(x, z, successor)
-    else
-      {:ok, y}
-    end
-  end
+  ## Worker Structure Interface
 
   defp successor(%__MODULE__{successor: x}) do
     x
@@ -124,21 +116,39 @@ defmodule Lyra.Worker do
     %{x | client: y}
   end
 
+  ## ADT on the Worker Structure
+
+  defp segment(state) do
+    [exclude: point(predecessor(state)), include: point(self())]
+  end
+
+  ## Ancillary
+
+  defp predecessor(x, y, z) do
+    unless Lyra.Modular.epsilon?(x, exclude: point(y), include: point(z)) do
+      {:ok, successor} = call(z, :successor)
+      predecessor(x, z, successor)
+    else
+      {:ok, y}
+    end
+  end
+
   defp point(x) when is_pid(x) do
     x
     |> identifier()
     |> digest()
   end
 
-  defp digest(x) do
-    :crypto.bytes_to_integer(:crypto.hash(:sha, x))
-  end
-
   defp identifier(x) do
     :erlang.pid_to_list(x)
   end
 
+  defp digest(x) do
+    :crypto.bytes_to_integer(:crypto.hash(:sha, x))
+  end
+
   defp unique do
+    ## Only on this vertex!
     make_ref()
   end
 end
