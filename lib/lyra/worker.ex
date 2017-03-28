@@ -8,6 +8,8 @@ defmodule Lyra.Worker do
 
   import GenServer, only: [start_link: 2, call: 2, reply: 2]
 
+  @ring Application.fetch_env!(:lyra, :ring)
+
   ## OTP Supervision Interface
 
   def start_link do
@@ -47,24 +49,6 @@ defmodule Lyra.Worker do
     :ok
   end
 
-  ## Interface to Ring (other vertices)
-
-  defp precede(p, s) do
-    call(p, {:precede, s, unique()})
-  end
-
-  defp succeed(s, p) do
-    call(s, {:succeed, p, unique()})
-  end
-
-  defp predecessor(x, y) do
-    call(x, {:predecessor, y})
-  end
-
-  defp successor(x) do
-    call(x, :successor)
-  end
-
   ## Generic Server Machinery Interface
 
   def init(x) do
@@ -80,23 +64,23 @@ defmodule Lyra.Worker do
     {:noreply, state |> _client(y)}
   end
   def handle_call({:enter, oracle}, _, state) do
-    {:ok, p} = predecessor(oracle, point(_identifier(state)))
-    {:ok, s} = successor(p)
+    {:ok, p} = @ring.predecessor(oracle, point(_identifier(state)))
+    {:ok, s} = @ring.successor(p)
     :ok = prompt(_client(state), segment(state))
-    :ok = precede(p, _identifier(state))
-    :ok = succeed(s, _identifier(state))
+    :ok = @ring.precede(p, _identifier(state))
+    :ok = @ring.succeed(s, _identifier(state))
     {:reply, :ok, state |> _successor(s) |> _predecessor(p)}
   end
   def handle_call(:exit, _, state) do
     :ok = prompt(_client(state), segment(state))
-    :ok = precede(_predecessor(state), _successor(state))
-    :ok = succeed(_successor(state), _predecessor(state))
+    :ok = @ring.precede(_predecessor(state), _successor(state))
+    :ok = @ring.succeed(_successor(state), _predecessor(state))
     {:reply, :ok, state |> _successor(_identifier(state))}
   end
   def handle_call({:successor, subject}, _, state) do
     {:ok, p} = predecessor(subject, _identifier(state), _successor(state))
     {:ok, s} = unless p == _identifier(state) do
-      successor(p)
+      @ring.successor(p)
     else
       {:ok, _successor(state)}
     end
@@ -164,7 +148,7 @@ defmodule Lyra.Worker do
 
   defp predecessor(x, p, s) do
     unless Lyra.Modular.epsilon?(x, exclude: point(p), include: point(s)) do
-      {:ok, t} = successor(s)
+      {:ok, t} = @ring.successor(s)
       predecessor(x, s, t)
     else
       {:ok, p}
@@ -184,10 +168,5 @@ defmodule Lyra.Worker do
 
   defp digest(x) do
     :crypto.bytes_to_integer(:crypto.hash(:sha, x))
-  end
-
-  defp unique do
-    ## Only on this vertex!
-    make_ref()
   end
 end
