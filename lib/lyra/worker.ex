@@ -50,7 +50,7 @@ defmodule Lyra.Worker do
   def handle_call(:prompt, {y, _} = x, state) do
     reply(x, :ok)
     :ok = prompt(y, segment(state))
-    {:noreply, client(state, y)}
+    {:noreply, state |> client(y)}
   end
   def handle_call({:enter, oracle}, _, state) do
     {:ok, p} = call(oracle, {:predecessor, point(self())})
@@ -124,19 +124,17 @@ defmodule Lyra.Worker do
 
   ## Ancillary
 
-  defp predecessor(x, y, z) do
-    unless Lyra.Modular.epsilon?(x, exclude: point(y), include: point(z)) do
-      {:ok, successor} = call(z, :successor)
-      predecessor(x, z, successor)
+  defp predecessor(x, p, s) do
+    unless Lyra.Modular.epsilon?(x, exclude: point(p), include: point(s)) do
+      {:ok, t} = call(s, :successor)
+      predecessor(x, s, t)
     else
-      {:ok, y}
+      {:ok, p}
     end
   end
 
   defp point(x) when is_pid(x) do
-    x
-    |> identifier()
-    |> digest()
+    x |> identifier() |> digest()
   end
 
   defp identifier(x) do
