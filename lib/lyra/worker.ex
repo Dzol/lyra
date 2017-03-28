@@ -1,5 +1,10 @@
 defmodule Lyra.Worker do
-  defstruct [:successor, :client, :predecessor]
+  defstruct [
+    :identifier,
+    :client,
+    :successor,
+    :predecessor
+  ]
 
   import GenServer, only: [start_link: 2, call: 2, reply: 2]
 
@@ -7,6 +12,10 @@ defmodule Lyra.Worker do
 
   def start_link do
     start_link(__MODULE__, [])
+  end
+
+  def start_link(interface: x) when is_list(x) and length(x) == 4 do
+    start_link(__MODULE__, [interface: x])
   end
 
   ## Application Interface
@@ -40,9 +49,9 @@ defmodule Lyra.Worker do
 
   ## Generic Server Machinery Interface
 
-  def init([]) do
+  def init(x) do
     {:ok,
-     %__MODULE__{} |> successor(self()) |> predecessor(self())
+     %__MODULE__{} |> identifier(i(x)) |> successor(i(x)) |> predecessor(i(x))
     }
   end
 
@@ -53,22 +62,22 @@ defmodule Lyra.Worker do
     {:noreply, state |> client(y)}
   end
   def handle_call({:enter, oracle}, _, state) do
-    {:ok, p} = call(oracle, {:predecessor, point(self())})
+    {:ok, p} = call(oracle, {:predecessor, point(identifier(state))})
     {:ok, s} = call(p, :successor)
     :ok = prompt(client(state), segment(state))
-    :ok = call(p, {:precede, self(), unique()})
-    :ok = call(s, {:succeed, self(), unique()})
+    :ok = call(p, {:precede, identifier(state), unique()})
+    :ok = call(s, {:succeed, identifier(state), unique()})
     {:reply, :ok, state |> successor(s) |> predecessor(p)}
   end
   def handle_call(:exit, _, state) do
     :ok = prompt(client(state), segment(state))
     :ok = call(predecessor(state), {:precede, successor(state), unique()})
     :ok = call(successor(state), {:succeed, predecessor(state), unique()})
-    {:reply, :ok, state |> successor(self())}
+    {:reply, :ok, state |> successor(identifier(state))}
   end
   def handle_call({:successor, subject}, _, state) do
-    {:ok, p} = predecessor(subject, self(), successor(state))
-    {:ok, s} = unless p == self() do
+    {:ok, p} = predecessor(subject, identifier(state), successor(state))
+    {:ok, s} = unless p == identifier(state) do
       call(p, :successor)
     else
       {:ok, successor(state)}
@@ -87,10 +96,18 @@ defmodule Lyra.Worker do
     {:reply, {:ok, successor(state)}, state}
   end
   def handle_call({:predecessor, subject}, _, state) do
-    {:reply, predecessor(subject, self(), successor(state)), state}
+    {:reply, predecessor(subject, identifier(state), successor(state)), state}
   end
 
   ## Worker Structure Interface
+
+  defp identifier(%__MODULE__{identifier: x}) do
+    x
+  end
+
+  defp identifier(x = %__MODULE__{}, y) do
+    %{x | identifier: y}
+  end
 
   defp successor(%__MODULE__{successor: x}) do
     x
@@ -119,10 +136,13 @@ defmodule Lyra.Worker do
   ## ADT on the Worker Structure
 
   defp segment(state) do
-    [exclude: point(predecessor(state)), include: point(self())]
+    [exclude: point(predecessor(state)), include: point(identifier(state))]
   end
 
   ## Ancillary
+
+  defp i([]),           do: self()
+  defp i(interface: x), do: x
 
   defp predecessor(x, p, s) do
     unless Lyra.Modular.epsilon?(x, exclude: point(p), include: point(s)) do
@@ -134,10 +154,13 @@ defmodule Lyra.Worker do
   end
 
   defp point(x) when is_pid(x) do
-    x |> identifier() |> digest()
+    x |> listify() |> digest()
+  end
+  defp point(x) when is_list(x) do
+    digest(x)
   end
 
-  defp identifier(x) do
+  defp listify(x) do
     :erlang.pid_to_list(x)
   end
 
