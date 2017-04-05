@@ -8,7 +8,7 @@
     <title>Lyra.Worker – lyra v0.1.0</title>
     <link rel="stylesheet" href="dist/app-f7824c48e6.css" />
     
-    <script src="dist/sidebar_items-06f91d559b.js"></script>
+    <script src="dist/sidebar_items-920b87afe4.js"></script>
   </head>
   <body data-type="modules">
     <script>if(localStorage.getItem('night-mode')) document.body.className += ' night-mode';</script>
@@ -75,6 +75,49 @@
             Summary
           </h1>
           
+  <div class="summary-types summary">
+    <h2>
+      <a href="#types">Types</a>
+    </h2>
+    <div class="summary-row">
+  <div class="summary-signature">
+    <a href="#t:bound/0">bound()</a>
+  </div>
+  
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#t:handle/0">handle()</a>
+  </div>
+  
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#t:ip4/0">ip4()</a>
+  </div>
+  
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#t:point/0">point()</a>
+  </div>
+  
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#t:segment/0">segment()</a>
+  </div>
+  
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#t:t/0">t()</a>
+  </div>
+  
+</div>
+
+  </div>
+
 
           
   <div class="summary-functions summary">
@@ -101,7 +144,7 @@
 </div>
 <div class="summary-row">
   <div class="summary-signature">
-    <a href="#init/1">init(list)</a>
+    <a href="#init/1">init(x)</a>
   </div>
   
 </div>
@@ -123,6 +166,12 @@
   </div>
   
 </div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#start_link/1">start_link(list)</a>
+  </div>
+  
+</div>
 
   </div>
 
@@ -132,6 +181,144 @@
         </section>
       
 
+      
+        <section id="types" class="details-list">
+          <h1 class="section-heading">
+            <a class="hover-link" href="#types">
+              <i class="icon-link"></i>
+            </a>
+            Types
+          </h1>
+          <div class="types-list">
+            <div class="detail" id="t:bound/0">
+  
+  <div class="detail-header">
+    <a href="#t:bound/0" class="detail-link" title="Link to this type">
+      <i class="icon-link"></i>
+    </a>
+    <span class="signature">bound()</span>
+    
+    
+    
+      <div class="specs">
+        
+          <pre>bound() :: <a href="#t:point/0">point</a></pre>
+        
+      </div>
+    
+  </div>
+  <section class="docstring">
+    
+  </section>
+</div>
+<div class="detail" id="t:handle/0">
+  
+  <div class="detail-header">
+    <a href="#t:handle/0" class="detail-link" title="Link to this type">
+      <i class="icon-link"></i>
+    </a>
+    <span class="signature">handle()</span>
+    
+    
+    
+      <div class="specs">
+        
+          <pre>handle() :: pid | <a href="#t:ip4/0">ip4</a> | nil</pre>
+        
+      </div>
+    
+  </div>
+  <section class="docstring">
+    
+  </section>
+</div>
+<div class="detail" id="t:ip4/0">
+  
+  <div class="detail-header">
+    <a href="#t:ip4/0" class="detail-link" title="Link to this type">
+      <i class="icon-link"></i>
+    </a>
+    <span class="signature">ip4()</span>
+    
+    
+    
+      <div class="specs">
+        
+          <pre>ip4() :: [byte]</pre>
+        
+      </div>
+    
+  </div>
+  <section class="docstring">
+    
+  </section>
+</div>
+<div class="detail" id="t:point/0">
+  
+  <div class="detail-header">
+    <a href="#t:point/0" class="detail-link" title="Link to this type">
+      <i class="icon-link"></i>
+    </a>
+    <span class="signature">point()</span>
+    
+    
+    
+      <div class="specs">
+        
+          <pre>point() :: non_neg_integer</pre>
+        
+      </div>
+    
+  </div>
+  <section class="docstring">
+    
+  </section>
+</div>
+<div class="detail" id="t:segment/0">
+  
+  <div class="detail-header">
+    <a href="#t:segment/0" class="detail-link" title="Link to this type">
+      <i class="icon-link"></i>
+    </a>
+    <span class="signature">segment()</span>
+    
+    
+    
+      <div class="specs">
+        
+          <pre>segment() :: [exclude: start :: <a href="#t:bound/0">bound</a>, include: stop :: <a href="#t:bound/0">bound</a>]</pre>
+        
+      </div>
+    
+  </div>
+  <section class="docstring">
+    
+  </section>
+</div>
+<div class="detail" id="t:t/0">
+  
+  <div class="detail-header">
+    <a href="#t:t/0" class="detail-link" title="Link to this type">
+      <i class="icon-link"></i>
+    </a>
+    <span class="signature">t()</span>
+    
+    
+    
+      <div class="specs">
+        
+          <pre>t() :: %Lyra.Worker{client: <a href="#t:handle/0">handle</a>, identifier: <a href="#t:handle/0">handle</a>, predecessor: <a href="#t:handle/0">handle</a>, successor: <a href="#t:handle/0">handle</a>}</pre>
+        
+      </div>
+    
+  </div>
+  <section class="docstring">
+    
+  </section>
+</div>
+
+          </div>
+        </section>
       
 
       
@@ -152,6 +339,12 @@
     
     
     
+      <div class="specs">
+        
+          <pre>enter(local :: <a href="#t:handle/0">handle</a>, remote :: <a href="#t:handle/0">handle</a>) :: :ok</pre>
+        
+      </div>
+    
   </div>
   <section class="docstring">
     
@@ -166,6 +359,12 @@
     <span class="signature">exit(vertex)</span>
     
     
+    
+      <div class="specs">
+        
+          <pre>exit(local :: <a href="#t:handle/0">handle</a>) :: :ok</pre>
+        
+      </div>
     
   </div>
   <section class="docstring">
@@ -193,7 +392,7 @@
     <a href="#init/1" class="detail-link" title="Link to this function">
       <i class="icon-link"></i>
     </a>
-    <span class="signature">init(list)</span>
+    <span class="signature">init(x)</span>
     
     
     
@@ -212,6 +411,12 @@
     
     
     
+      <div class="specs">
+        
+          <pre>prompt(local :: <a href="#t:handle/0">handle</a>) :: :ok</pre>
+        
+      </div>
+    
   </div>
   <section class="docstring">
     
@@ -227,6 +432,12 @@
     
     
     
+      <div class="specs">
+        
+          <pre>query(local :: <a href="#t:handle/0">handle</a>, iodata) :: remote :: <a href="#t:handle/0">handle</a></pre>
+        
+      </div>
+    
   </div>
   <section class="docstring">
     
@@ -241,6 +452,33 @@
     <span class="signature">start_link()</span>
     
     
+    
+      <div class="specs">
+        
+          <pre>start_link() :: <a href="https://hexdocs.pm/elixir/GenServer.html#t:on_start/0">GenServer.on_start</a></pre>
+        
+      </div>
+    
+  </div>
+  <section class="docstring">
+    
+  </section>
+</div>
+<div class="detail" id="start_link/1">
+  
+  <div class="detail-header">
+    <a href="#start_link/1" class="detail-link" title="Link to this function">
+      <i class="icon-link"></i>
+    </a>
+    <span class="signature">start_link(list)</span>
+    
+    
+    
+      <div class="specs">
+        
+          <pre>start_link([{:interface, i :: <a href="#t:ip4/0">ip4</a>}]) :: <a href="https://hexdocs.pm/elixir/GenServer.html#t:on_start/0">GenServer.on_start</a></pre>
+        
+      </div>
     
   </div>
   <section class="docstring">

@@ -4,10 +4,12 @@ fonts/icomoon.eot
 fonts/icomoon.svg
 fonts/icomoon.ttf
 fonts/icomoon.woff
-dist/sidebar_items-06f91d559b.js
+dist/sidebar_items-920b87afe4.js
 api-reference.html
 404.html
 Lyra.html
 Lyra.Modular.html
+Lyra.Ring.html
+Lyra.Ring.ErlangProcess.html
 Lyra.Worker.html
 index.html

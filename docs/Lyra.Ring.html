@@ -5,7 +5,7 @@
     <meta http-equiv="x-ua-compatible" content="ie=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="generator" content="ExDoc v0.15.0">
-    <title>Lyra.Modular – lyra v0.1.0</title>
+    <title>Lyra.Ring – lyra v0.1.0</title>
     <link rel="stylesheet" href="dist/app-f7824c48e6.css" />
     
     <script src="dist/sidebar_items-920b87afe4.js"></script>
@@ -59,14 +59,16 @@
 
       <h1>
         <small class="visible-xs">lyra v0.1.0</small>
-        Lyra.Modular
+        Lyra.Ring
+        
+          <small>behaviour</small>
         
         
       </h1>
 
       
         <section id="moduledoc">
-          <p>Modular arithmetic on a <em>(u, v]</em> interval</p>
+          <p>Interface for the Ring (to/from other vertices)</p>
 
         </section>
       
@@ -80,89 +82,70 @@
             Summary
           </h1>
           
-  <div class="summary-types summary">
-    <h2>
-      <a href="#types">Types</a>
-    </h2>
-    <div class="summary-row">
-  <div class="summary-signature">
-    <a href="#t:bound/0">bound()</a>
-  </div>
-  
-</div>
-<div class="summary-row">
-  <div class="summary-signature">
-    <a href="#t:interval/0">interval()</a>
-  </div>
-  
-    <div class="summary-synopsis"><p>An interval like <em>(u, v]</em> in mathematics</p>
-</div>
-  
-</div>
-<div class="summary-row">
-  <div class="summary-signature">
-    <a href="#t:norm/0">norm()</a>
-  </div>
-  
-</div>
-
-  </div>
-
-
-          
-  <div class="summary-functions summary">
-    <h2>
-      <a href="#functions">Functions</a>
-    </h2>
-    <div class="summary-row">
-  <div class="summary-signature">
-    <a href="#epsilon?/2">epsilon?(x, list)</a>
-  </div>
-  
-    <div class="summary-synopsis"><p>This is like <em>x ∈ (u, v]</em> under modular arithmetic</p>
-</div>
-  
-</div>
-<div class="summary-row">
-  <div class="summary-signature">
-    <a href="#epsilon?/3">epsilon?(x, list, n)</a>
-  </div>
-  
-    <div class="summary-synopsis"><p>This is the same as <a href="#epsilon?/2"><code class="inline">epsilon?/2</code></a> but modulo <em>n</em></p>
-</div>
-  
-</div>
-
-  </div>
-
 
           
 
+          
+  <div class="summary-callbacks summary">
+    <h2>
+      <a href="#callbacks">Callbacks</a>
+    </h2>
+    <div class="summary-row">
+  <div class="summary-signature">
+    <a href="#c:precede/2">precede(term, term)</a>
+  </div>
+  
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#c:predecessor/2">predecessor(vertex, value)</a>
+  </div>
+  
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#c:succeed/2">succeed(term, term)</a>
+  </div>
+  
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#c:successor/1">successor(vertex)</a>
+  </div>
+  
+</div>
+
+  </div>
+
+
         </section>
       
 
       
-        <section id="types" class="details-list">
+
+      
+
+      
+        <section id="callbacks" class="details-list">
           <h1 class="section-heading">
-            <a class="hover-link" href="#types">
+            <a class="hover-link" href="#callbacks">
               <i class="icon-link"></i>
             </a>
-            Types
+            Callbacks
           </h1>
-          <div class="types-list">
-            <div class="detail" id="t:bound/0">
+          <div class="detail" id="c:precede/2">
   
   <div class="detail-header">
-    <a href="#t:bound/0" class="detail-link" title="Link to this type">
+    <a href="#c:precede/2" class="detail-link" title="Link to this callback">
       <i class="icon-link"></i>
     </a>
-    <span class="signature">bound()</span>
+    <span class="signature">precede(term, term)</span>
     
     
     
       <div class="specs">
         
-          <pre>bound() :: integer</pre>
+          <pre>precede(term, term) :: :ok</pre>
         
       </div>
     
@@ -171,41 +154,19 @@
     
   </section>
 </div>
-<div class="detail" id="t:interval/0">
+<div class="detail" id="c:predecessor/2">
   
   <div class="detail-header">
-    <a href="#t:interval/0" class="detail-link" title="Link to this type">
+    <a href="#c:predecessor/2" class="detail-link" title="Link to this callback">
       <i class="icon-link"></i>
     </a>
-    <span class="signature">interval()</span>
+    <span class="signature">predecessor(vertex, value)</span>
     
     
     
       <div class="specs">
         
-          <pre>interval() :: [exclude: u :: <a href="#t:bound/0">bound</a>, include: v :: <a href="#t:bound/0">bound</a>]</pre>
-        
-      </div>
-    
-  </div>
-  <section class="docstring">
-    <p>An interval like <em>(u, v]</em> in mathematics</p>
-
-  </section>
-</div>
-<div class="detail" id="t:norm/0">
-  
-  <div class="detail-header">
-    <a href="#t:norm/0" class="detail-link" title="Link to this type">
-      <i class="icon-link"></i>
-    </a>
-    <span class="signature">norm()</span>
-    
-    
-    
-      <div class="specs">
-        
-          <pre>norm() :: integer</pre>
+          <pre>predecessor(vertex :: term, value :: term) :: {:ok, vertex :: term}</pre>
         
       </div>
     
@@ -214,67 +175,50 @@
     
   </section>
 </div>
-
-          </div>
-        </section>
-      
-
-      
-        <section id="functions" class="details-list">
-          <h1 class="section-heading">
-            <a class="hover-link" href="#functions">
-              <i class="icon-link"></i>
-            </a>
-            Functions
-          </h1>
-          <div class="detail" id="epsilon?/2">
+<div class="detail" id="c:succeed/2">
   
   <div class="detail-header">
-    <a href="#epsilon?/2" class="detail-link" title="Link to this function">
+    <a href="#c:succeed/2" class="detail-link" title="Link to this callback">
       <i class="icon-link"></i>
     </a>
-    <span class="signature">epsilon?(x, list)</span>
+    <span class="signature">succeed(term, term)</span>
     
     
     
       <div class="specs">
         
-          <pre>epsilon?(integer, <a href="#t:interval/0">interval</a>) :: boolean | no_return</pre>
+          <pre>succeed(term, term) :: :ok</pre>
         
       </div>
     
   </div>
   <section class="docstring">
-    <p>This is like <em>x ∈ (u, v]</em> under modular arithmetic</p>
-
+    
   </section>
 </div>
-<div class="detail" id="epsilon?/3">
+<div class="detail" id="c:successor/1">
   
   <div class="detail-header">
-    <a href="#epsilon?/3" class="detail-link" title="Link to this function">
+    <a href="#c:successor/1" class="detail-link" title="Link to this callback">
       <i class="icon-link"></i>
     </a>
-    <span class="signature">epsilon?(x, list, n)</span>
+    <span class="signature">successor(vertex)</span>
     
     
     
       <div class="specs">
         
-          <pre>epsilon?(integer, <a href="#t:interval/0">interval</a>, integer) :: boolean | no_return</pre>
+          <pre>successor(vertex :: term) :: {:ok, vertex :: term}</pre>
         
       </div>
     
   </div>
   <section class="docstring">
-    <p>This is the same as <a href="#epsilon?/2"><code class="inline">epsilon?/2</code></a> but modulo <em>n</em></p>
-
+    
   </section>
 </div>
 
         </section>
-      
-
       
           <footer class="footer">
         <p>
