@@ -1,6 +1,8 @@
 defmodule LyraProperty do
   use ExUnit.Case
-  use EQC.ExUnit
+  use ExUnit.Case
+  use PropCheck
+
   @bits Application.fetch_env!(:lyra, :digest)[:size]
 
   describe "Lyra.Worker.*" do
@@ -20,12 +22,9 @@ defmodule LyraProperty do
         b_ = Lyra.query(b, stringify(x))
         c_ = Lyra.query(c, stringify(x))
 
-        collect a: a_, b: b_, c: c_ do
-
-          ## Then:
-          ensure a_ == b_
-          ensure b_ == c_
-        end
+        ## Then:
+        assert a_ == b_
+        assert b_ == c_
       end
     end
   end
@@ -33,7 +32,7 @@ defmodule LyraProperty do
   ## Test Ancillaries
 
   defp natural do
-    let i <- largebinary(div(@bits, 8)) do
+    let i <- binary(div(@bits, 8)) do
       abs(:crypto.bytes_to_integer(i))
     end
   end

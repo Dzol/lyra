@@ -1,6 +1,6 @@
 defmodule ModularProperty do
   use ExUnit.Case
-  use EQC.ExUnit
+  use PropCheck
 
   @norm round(:math.pow(2, Application.fetch_env!(:lyra, :digest)[:size]))
 
@@ -8,7 +8,7 @@ defmodule ModularProperty do
     import Lyra.Modular, only: [epsilon?: 2]
     forall {u, v} <- bounds() do
       forall x <- point() do
-        ensure epsilon?(x, exclude: u, include: v) == correct(x, u, v)
+        assert epsilon?(x, exclude: u, include: v) == correct(x, u, v)
       end
     end
   end
@@ -40,7 +40,7 @@ defmodule ModularProperty do
   end
 
   defp natural do
-    let i <- oneof([nat(), largeint()]) do
+    let i <- oneof([nat(), large_int()]) do
       if abs(i) < biggest(), do: abs(i)
     end
   end

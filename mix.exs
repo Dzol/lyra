@@ -22,12 +22,12 @@ defmodule Lyra.Mixfile do
     [{:credo, "~> 0.5", only: [:dev, :test]},
      {:dialyxir, "~> 0.4", only: [:dev], runtime: false},
      {:excoveralls, "~> 0.6", only: :test},
-     {:eqc_ex, "~> 1.4", only: :test},
+     {:propcheck, "~> 0.0.1", only: :test},
      {:ex_doc, "~> 0.15", only: :dev, runtime: false}]
   end
 
   defp aliases do
-    [property: [&test/1, "test property/"]]
+    [property: [&test/1, "test property/lyra_property.exs property/lyra/modular_property.ex"]]
   end
 
   defp documentation do
