@@ -72,7 +72,7 @@ defmodule Lyra.Worker do
 
   def init(x) do
     {:ok,
-     %__MODULE__{} |> _identifier(i(x)) |> _successor(i(x)) |> _predecessor(i(x))
+     %__MODULE__{} |> identifier(i(x)) |> successor(i(x)) |> predecessor(i(x))
     }
   end
 
@@ -80,85 +80,85 @@ defmodule Lyra.Worker do
   def handle_call(:prompt, {y, _} = x, state) do
     reply(x, :ok)
     :ok = prompt(y, segment(state))
-    {:noreply, state |> _client(y)}
+    {:noreply, state |> client(y)}
   end
   def handle_call({:enter, oracle}, _, state) do
-    {:ok, p} = @ring.predecessor(oracle, point(_identifier(state)))
+    {:ok, p} = @ring.predecessor(oracle, point(identifier(state)))
     {:ok, s} = @ring.successor(p)
-    :ok = prompt(_client(state), segment(state))
-    :ok = @ring.precede(p, _identifier(state))
-    :ok = @ring.succeed(s, _identifier(state))
-    {:reply, :ok, state |> _successor(s) |> _predecessor(p)}
+    :ok = prompt(client(state), segment(state))
+    :ok = @ring.precede(p, identifier(state))
+    :ok = @ring.succeed(s, identifier(state))
+    {:reply, :ok, state |> successor(s) |> predecessor(p)}
   end
   def handle_call(:exit, _, state) do
-    :ok = prompt(_client(state), segment(state))
-    :ok = @ring.precede(_predecessor(state), _successor(state))
-    :ok = @ring.succeed(_successor(state), _predecessor(state))
-    {:reply, :ok, state |> _successor(_identifier(state))}
+    :ok = prompt(client(state), segment(state))
+    :ok = @ring.precede(predecessor(state), successor(state))
+    :ok = @ring.succeed(successor(state), predecessor(state))
+    {:reply, :ok, state |> successor(identifier(state))}
   end
   def handle_call({:successor, subject}, _, state) do
-    {:ok, p} = predecessor(subject, _identifier(state), _successor(state))
-    {:ok, s} = unless p == _identifier(state) do
+    {:ok, p} = predecessor(subject, identifier(state), successor(state))
+    {:ok, s} = unless p == identifier(state) do
       @ring.successor(p)
     else
-      {:ok, _successor(state)}
+      {:ok, successor(state)}
     end
     {:reply, s, state}
   end
   ## These originate from inside the ring (though ultimately from outside)
   def handle_call({:precede, vertex, _}, _, state) do
-    {:reply, :ok, _successor(state, vertex)}
+    {:reply, :ok, successor(state, vertex)}
   end
   def handle_call({:succeed, vertex, _}, _, state) do
-    :ok = prompt(_client(state), segment(state))
-    {:reply, :ok, _predecessor(state, vertex)}
+    :ok = prompt(client(state), segment(state))
+    {:reply, :ok, predecessor(state, vertex)}
   end
   def handle_call(:successor, _, state) do
-    {:reply, {:ok, _successor(state)}, state}
+    {:reply, {:ok, successor(state)}, state}
   end
   def handle_call({:predecessor, subject}, _, state) do
-    {:reply, predecessor(subject, _identifier(state), _successor(state)), state}
+    {:reply, predecessor(subject, identifier(state), successor(state)), state}
   end
 
   ## Worker Structure Interface (w/ leading _)
 
-  @spec _identifier(__MODULE__.t) :: handle
-  defp _identifier(%__MODULE__{identifier: x}) do
+  @spec identifier(__MODULE__.t) :: handle
+  defp identifier(%__MODULE__{identifier: x}) do
     x
   end
 
-  @spec _identifier(__MODULE__.t, handle) :: __MODULE__.t
-  defp _identifier(x = %__MODULE__{}, y) do
+  @spec identifier(__MODULE__.t, handle) :: __MODULE__.t
+  defp identifier(x = %__MODULE__{}, y) do
     %{x | identifier: y}
   end
 
-  @spec _successor(__MODULE__.t) :: handle
-  defp _successor(%__MODULE__{successor: x}) do
+  @spec successor(__MODULE__.t) :: handle
+  defp successor(%__MODULE__{successor: x}) do
     x
   end
 
-  @spec _successor(__MODULE__.t, handle) :: __MODULE__.t
-  defp _successor(x = %__MODULE__{}, y) do
+  @spec successor(__MODULE__.t, handle) :: __MODULE__.t
+  defp successor(x = %__MODULE__{}, y) do
     %{x | successor: y}
   end
 
-  @spec _predecessor(__MODULE__.t) :: handle
-  defp _predecessor(%__MODULE__{predecessor: x}) do
+  @spec predecessor(__MODULE__.t) :: handle
+  defp predecessor(%__MODULE__{predecessor: x}) do
     x
   end
 
-  @spec _predecessor(__MODULE__.t, handle) :: __MODULE__.t
-  defp _predecessor(x = %__MODULE__{}, y) do
+  @spec predecessor(__MODULE__.t, handle) :: __MODULE__.t
+  defp predecessor(x = %__MODULE__{}, y) do
     %{x | predecessor: y}
   end
 
-  @spec _client(__MODULE__.t) :: handle
-  defp _client(%__MODULE__{client: x}) do
+  @spec client(__MODULE__.t) :: handle
+  defp client(%__MODULE__{client: x}) do
     x
   end
 
-  @spec _client(__MODULE__.t, handle) :: __MODULE__.t
-  defp _client(x = %__MODULE__{}, y) do
+  @spec client(__MODULE__.t, handle) :: __MODULE__.t
+  defp client(x = %__MODULE__{}, y) do
     %{x | client: y}
   end
 
@@ -166,7 +166,7 @@ defmodule Lyra.Worker do
 
   @spec segment(__MODULE__.t) :: segment
   defp segment(state) do
-    [exclude: point(_predecessor(state)), include: point(_identifier(state))]
+    [exclude: point(predecessor(state)), include: point(identifier(state))]
   end
 
   ## Ancillary
