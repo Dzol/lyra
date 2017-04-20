@@ -1,4 +1,6 @@
 defmodule Lyra.Worker do
+  @moduledoc false
+
   @type segment :: [exclude: start :: bound, include: stop :: bound]
   @type bound :: point
   @type point :: non_neg_integer
@@ -98,7 +100,7 @@ defmodule Lyra.Worker do
   end
   def handle_call({:successor, subject}, _, state) do
     {:ok, p} = predecessor(subject, identifier(state), successor(state))
-    {:ok, s} = unless p == identifier(state) do
+    {:ok, s} = if p != identifier(state) do
       @ring.successor(p)
     else
       {:ok, successor(state)}
@@ -177,7 +179,9 @@ defmodule Lyra.Worker do
 
   @spec predecessor(point, handle, handle) :: {:ok, handle}
   defp predecessor(x, p, s) do
-    unless Lyra.Modular.epsilon?(x, exclude: point(p), include: point(s)) do
+    alias Lyra.Modular
+
+    if not Modular.epsilon?(x, exclude: point(p), include: point(s)) do
       {:ok, t} = @ring.successor(s)
       predecessor(x, s, t)
     else

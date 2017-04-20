@@ -10,7 +10,7 @@ defmodule Lyra.Mixfile do
      deps: deps(),
      aliases: aliases(),
      test_pattern: "*_{test,property}.exs",
-     docs: documentation()] ++ cover()
+     docs: documentation()] ++ cover() ++ dialyzer()
   end
 
   def application do
@@ -41,5 +41,10 @@ defmodule Lyra.Mixfile do
 
   defp test(_) do
     Mix.env(:test)
+  end
+
+  defp dialyzer do
+    [dialyzer: [plt_core_path: ".dialyzer/"]
+    ]
   end
 end

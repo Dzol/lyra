@@ -1,4 +1,4 @@
-defmodule Lyra.Ring.ErlangProcess do  
+defmodule Lyra.Ring.ErlangProcess do
   @moduledoc """
   And Erlang process ring.
   """

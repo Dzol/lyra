@@ -1,4 +1,4 @@
-defmodule Lyra.Ring do  
+defmodule Lyra.Ring do
   @moduledoc """
   Interface for the Ring (to/from other vertices)
   """

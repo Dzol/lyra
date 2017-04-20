@@ -38,7 +38,9 @@ defmodule Lyra.Modular do
 
   @spec _epsilon?(integer, {bound, bound}, norm) :: boolean | no_return
   defp _epsilon?(x, {u, v}, n) do
-    natural!(x); natural!(u); natural!(v)
+    natural!(x)
+    natural!(u)
+    natural!(v)
 
     if not (u === v) do
       epsilon?(x, u, v, n)
