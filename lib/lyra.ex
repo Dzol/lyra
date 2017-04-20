@@ -1,21 +1,30 @@
 defmodule Lyra do
   @moduledoc """
-  A Chord in Elixir.
+  A Chord in Elixir
   """
 
-  alias Lyra.Worker
+  @type handle :: pid | ip4 | nil
+  @type ip4    :: [byte]
+
+  import GenServer, only: [call: 2]
+
+  ## Interface for Client
 
   @doc """
-  Prompt Lyra for changes.
+  Prompt Lyra for changes
   """
-  def prompt(vertex) do
-    Worker.prompt(vertex)
+  @spec prompt(local :: handle) :: :ok
+  def prompt(vertex) when is_pid(vertex) do
+    call(vertex, :prompt)
   end
 
   @doc """
-  Query Lyra for a vertex.
+  Query Lyra
   """
-  def query(vertex, name) when is_pid(vertex) and is_list(name) or is_binary(name) do
-    Worker.query(vertex, name)
+  @spec query(local :: handle, iodata) :: remote :: handle
+  def query(vertex, symbol) when is_pid(vertex) and is_list(symbol) or is_binary(symbol) do
+    alias Lyra.Worker
+
+    call(vertex, {:successor, Worker.digest(symbol)})
   end
 end

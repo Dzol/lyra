@@ -1,6 +1,8 @@
 defmodule Lyra.Ring do
   @moduledoc """
-  Interface for the Ring (to/from other vertices)
+  Interface for the Ring
+
+  This is how a vertices communicate: both inbound + outbound.
   """
 
   @callback precede(term, term) :: :ok

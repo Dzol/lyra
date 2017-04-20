@@ -48,18 +48,6 @@ defmodule Lyra.Worker do
     call(vertex, :exit)
   end
 
-  ## Interface for Client
-
-  @spec prompt(local :: handle) :: :ok
-  def prompt(vertex) when is_pid(vertex) do
-    call(vertex, :prompt)
-  end
-
-  @spec query(local :: handle, iodata) :: remote :: handle
-  def query(vertex, name) when is_pid(vertex) and is_list(name) or is_binary(name) do
-    call(vertex, {:successor, digest(name)})
-  end
-
   ## Interface for Lyra
 
   @spec prompt(local :: handle, segment) :: :ok
@@ -203,7 +191,7 @@ defmodule Lyra.Worker do
   end
 
   @spec digest(iodata) :: integer
-  defp digest(x) do
+  def digest(x) do
     :crypto.bytes_to_integer(:crypto.hash(:sha, x))
   end
 end
