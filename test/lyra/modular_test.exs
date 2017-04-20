@@ -1,7 +1,7 @@
 defmodule ModularTest do
   use ExUnit.Case
 
-  test "membership in an interval like [u, v) under modular arithmetic" do
+  test "membership in an interval like (u, v] under modular arithmetic" do
     import Lyra.Modular, only: [epsilon?: 3]
     for {x, u, v, a} <- table() do
       assert epsilon?(x, [exclude: u, include: v], norm()) == a
