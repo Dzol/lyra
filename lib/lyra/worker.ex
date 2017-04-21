@@ -12,12 +12,12 @@ defmodule Lyra.Worker do
     :predecessor
   ]
   @type t :: %__MODULE__{
-    identifier:  handle,
-    client:      handle,
-    successor:   handle,
-    predecessor: handle
+    identifier:  handle | nil,
+    client:      handle | nil,
+    successor:   handle | nil,
+    predecessor: handle | nil
   }
-  @type handle :: pid | ip4 | nil
+  @type handle :: pid | ip4
   @type ip4    :: [byte]
 
   import GenServer, only: [start_link: 2, call: 2, reply: 2]
