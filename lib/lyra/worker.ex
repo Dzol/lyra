@@ -75,16 +75,21 @@ defmodule Lyra.Worker do
   def handle_call({:enter, oracle}, _, state) do
     {:ok, p} = @ring.predecessor(oracle, point(identifier(state)))
     {:ok, s} = @ring.successor(p)
-    :ok = prompt(client(state), segment(state))
+    :ok = prompt(client(state), change(state, p))
     :ok = @ring.precede(p, identifier(state))
     :ok = @ring.succeed(s, identifier(state))
     {:reply, :ok, state |> successor(s) |> predecessor(p)}
   end
   def handle_call(:exit, _, state) do
-    :ok = prompt(client(state), segment(state))
+    :ok = prompt(client(state), change(state, identifier(state)))
     :ok = @ring.precede(predecessor(state), successor(state))
     :ok = @ring.succeed(successor(state), predecessor(state))
-    {:reply, :ok, state |> successor(identifier(state))}
+    {:reply,
+     :ok,
+     state
+     |> successor(identifier(state))
+     |> predecessor(identifier(state))
+    }
   end
   def handle_call({:successor, subject}, _, state) do
     {:ok, p} = predecessor(subject, identifier(state), successor(state))
@@ -100,7 +105,7 @@ defmodule Lyra.Worker do
     {:reply, :ok, successor(state, vertex)}
   end
   def handle_call({:succeed, vertex, _}, _, state) do
-    :ok = prompt(client(state), segment(state))
+    :ok = prompt(client(state), change(state, vertex))
     {:reply, :ok, predecessor(state, vertex)}
   end
   def handle_call(:successor, _, state) do
@@ -153,6 +158,11 @@ defmodule Lyra.Worker do
   end
 
   ## ADT on the Worker Structure
+
+  @spec change(__MODULE__.t, handle) :: segment
+  defp change(x, y) do
+    x |> predecessor(y) |> segment()
+  end
 
   @spec segment(__MODULE__.t) :: segment
   defp segment(state) do

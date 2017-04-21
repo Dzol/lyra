@@ -23,22 +23,28 @@ defmodule PromptTest do
     :ok = Lyra.prompt(i)
     :ok = Lyra.prompt(j)
     :ok = Lyra.prompt(k)
-    assert_receive {_, x = {^i, _}, {:prompt, [exclude: _, include: _]}}
-    assert_receive {_, y = {^j, _}, {:prompt, [exclude: _, include: _]}}
-    assert_receive {_, z = {^k, _}, {:prompt, [exclude: _, include: _]}}
+    assert_receive {_, x = {^i, _}, {:prompt, s0 = [exclude: _, include: _]}}
+    assert_receive {_, y = {^j, _}, {:prompt, t0 = [exclude: _, include: _]}}
+    assert_receive {_, z = {^k, _}, {:prompt, u0 = [exclude: _, include: _]}}
+    refute s0 == t0
+    refute t0 == u0
+    refute u0 == s0
     reply(x, :ok)
     reply(y, :ok)
     reply(z, :ok)
 
     outcome = Task.async(merge(j, i))
-    assert_receive {_, a = {^j, _}, {:prompt, [exclude: _, include: _]}}
+    assert_receive {_, a = {^j, _}, {:prompt, t1 = [exclude: _, include: _]}}
+    refute t0 == t1
     reply(a, :ok)
-    assert_receive {_, b = {^i, _}, {:prompt, [exclude: _, include: _]}}
+    assert_receive {_, b = {^i, _}, {:prompt, s1 = [exclude: _, include: _]}}
+    refute s0 == s1
     reply(b, :ok)
     assert Task.await(outcome) == :success
 
     outcome = Task.async(merge(k, j))
-    assert_receive {_, c = {^k, _}, {:prompt, [exclude: _, include: _]}}
+    assert_receive {_, c = {^k, _}, {:prompt, u1 = [exclude: _, include: _]}}
+    refute u0 == u1
     reply(c, :ok)
     assert_receive {_, d = {l, _}, {:prompt, [exclude: _, include: _]}}
     reply(d, :ok)
@@ -47,7 +53,8 @@ defmodule PromptTest do
 
     outcome = Task.async(split(i))
     m = successor(i)
-    assert_receive {_, e = {^i, _}, {:prompt, [exclude: _, include: _]}}
+    assert_receive {_, e = {^i, _}, {:prompt, s2 = [exclude: _, include: _]}}
+    assert s0 == s2
     reply(e, :ok)
     assert_receive {_, f = {^m, _}, {:prompt, [exclude: _, include: _]}}
     reply(f, :ok)
