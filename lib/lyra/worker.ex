@@ -9,20 +9,24 @@ defmodule Lyra.Worker do
     :identifier,
     :client,
     :successor,
-    :predecessor
+    :predecessor,
+    :table
   ]
   @type t :: %__MODULE__{
     identifier:  handle | nil,
     client:      handle | nil,
     successor:   handle | nil,
-    predecessor: handle | nil
+    predecessor: handle | nil,
+    table:       table  | nil
   }
+  @type table  :: [handle]
   @type handle :: pid | ip4
   @type ip4    :: [byte]
 
   import GenServer, only: [start_link: 2, call: 2, reply: 2]
 
   @ring Application.fetch_env!(:lyra, :ring)
+  @bits Application.fetch_env!(:lyra, :digest)[:size]
 
   ## OTP Supervision Interface
 
@@ -78,7 +82,12 @@ defmodule Lyra.Worker do
     :ok = prompt(client(state), change(state, p))
     :ok = @ring.precede(p, identifier(state))
     :ok = @ring.succeed(s, identifier(state))
-    {:reply, :ok, state |> successor(s) |> predecessor(p)}
+    {:reply,
+     :ok,
+     state
+     |> successor(s)
+     |> predecessor(p)
+    }
   end
   def handle_call(:exit, _, state) do
     :ok = prompt(client(state), change(state, identifier(state)))
@@ -155,6 +164,16 @@ defmodule Lyra.Worker do
   @spec client(__MODULE__.t, handle) :: __MODULE__.t
   defp client(x = %__MODULE__{}, y) do
     %{x | client: y}
+  end
+
+  @spec table(__MODULE__.t) :: table
+  defp table(%__MODULE__{table: x}) when is_list(x) and length(x) < @bits do
+    x
+  end
+
+  @spec table(__MODULE__.t, table) :: __MODULE__.t
+  defp table(x = %__MODULE__{}, y) when is_list(y) and length(y) < @bits do
+    %{x | table: y}
   end
 
   ## ADT on the Worker Structure
