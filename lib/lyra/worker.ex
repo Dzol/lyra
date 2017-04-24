@@ -10,14 +10,16 @@ defmodule Lyra.Worker do
     :client,
     :successor,
     :predecessor,
-    :table
+    :finger,
+    :heir
   ]
   @type t :: %__MODULE__{
     identifier:  handle | nil,
     client:      handle | nil,
     successor:   handle | nil,
     predecessor: handle | nil,
-    table:       table  | nil
+    finger:      table  | nil,
+    heir:        table  | nil
   }
   @type table  :: [handle]
   @type handle :: pid | ip4
@@ -166,14 +168,24 @@ defmodule Lyra.Worker do
     %{x | client: y}
   end
 
-  @spec table(__MODULE__.t) :: table
-  defp table(%__MODULE__{table: x}) when is_list(x) and length(x) < @bits do
+  @spec finger(__MODULE__.t) :: table
+  defp finger(%__MODULE__{finger: x}) when is_list(x) and length(x) < @bits do
     x
   end
 
-  @spec table(__MODULE__.t, table) :: __MODULE__.t
-  defp table(x = %__MODULE__{}, y) when is_list(y) and length(y) < @bits do
-    %{x | table: y}
+  @spec finger(__MODULE__.t, table) :: __MODULE__.t
+  defp finger(x = %__MODULE__{}, y) when is_list(y) and length(y) < @bits do
+    %{x | finger: y}
+  end
+
+  @spec heir(__MODULE__.t) :: table
+  defp heir(%__MODULE__{heir: x}) do
+    x
+  end
+
+  @spec heir(__MODULE__.t, table) :: __MODULE__.t
+  defp heir(x = %__MODULE__{}, y) do
+    %{x | heir: y}
   end
 
   ## ADT on the Worker Structure
