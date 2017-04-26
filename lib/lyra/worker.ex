@@ -10,7 +10,6 @@ defmodule Lyra.Worker do
     :client,
     :successor,
     :predecessor,
-    :finger,
     :heir
   ]
   @type t :: %__MODULE__{
@@ -18,7 +17,6 @@ defmodule Lyra.Worker do
     client:      handle | nil,
     successor:   handle | nil,
     predecessor: handle | nil,
-    finger:      table  | nil,
     heir:        table  | nil
   }
   @type table  :: [handle]
@@ -28,7 +26,6 @@ defmodule Lyra.Worker do
   import GenServer, only: [start_link: 2, call: 2, reply: 2]
 
   @ring Application.fetch_env!(:lyra, :ring)
-  @bits Application.fetch_env!(:lyra, :digest)[:size]
 
   ## OTP Supervision Interface
 
@@ -166,16 +163,6 @@ defmodule Lyra.Worker do
   @spec client(__MODULE__.t, handle) :: __MODULE__.t
   defp client(x = %__MODULE__{}, y) do
     %{x | client: y}
-  end
-
-  @spec finger(__MODULE__.t) :: table
-  defp finger(%__MODULE__{finger: x}) when is_list(x) and length(x) < @bits do
-    x
-  end
-
-  @spec finger(__MODULE__.t, table) :: __MODULE__.t
-  defp finger(x = %__MODULE__{}, y) when is_list(y) and length(y) < @bits do
-    %{x | finger: y}
   end
 
   @spec heir(__MODULE__.t) :: table
