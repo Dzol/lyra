@@ -10,7 +10,7 @@ defmodule Lyra.Worker do
     :client,
     :successor,
     :predecessor,
-    :heir
+    heir: []
   ]
   @type t :: %__MODULE__{
     identifier:  handle | nil,
